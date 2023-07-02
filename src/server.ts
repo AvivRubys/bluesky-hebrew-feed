@@ -11,17 +11,13 @@ import { AppContext, Config } from './config';
 import wellKnown from './well-known';
 
 export class FeedGenerator {
-  public app: express.Application;
   public server?: http.Server;
-  public db: Database;
-  public firehose: FirehoseSubscription;
-  public cfg: Config;
 
   constructor(
-    app: express.Application,
-    db: Database,
-    firehose: FirehoseSubscription,
-    cfg: Config,
+    private app: express.Application,
+    private db: Database,
+    private firehose: FirehoseSubscription,
+    private cfg: Config,
   ) {
     this.app = app;
     this.db = db;

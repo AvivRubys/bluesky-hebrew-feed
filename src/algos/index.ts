@@ -3,7 +3,7 @@ import {
   QueryParams,
   OutputSchema as AlgoOutput,
 } from '../lexicon/types/app/bsky/feed/getFeedSkeleton';
-import * as whatsAlf from './whats-alf';
+import * as hebrewFeed from './hebrew-feed';
 
 type AlgoHandler = (
   ctx: AppContext,
@@ -11,7 +11,7 @@ type AlgoHandler = (
 ) => Promise<AlgoOutput>;
 
 const algos: Record<string, AlgoHandler> = {
-  [whatsAlf.shortname]: whatsAlf.handler,
+  [hebrewFeed.shortname]: hebrewFeed.handler,
 };
 
 export default algos;

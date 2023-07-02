@@ -3,10 +3,11 @@ import FeedGenerator from './server';
 import { parseEnvironment } from './config';
 
 async function run() {
-  const server = FeedGenerator.create(parseEnvironment());
+  const config = parseEnvironment();
+  const server = FeedGenerator.create(config);
   await server.start();
   console.log(
-    `🤖 running feed generator at http://${server.cfg.FEEDGEN_LISTENHOST}:${server.cfg.FEEDGEN_PORT}`,
+    `🤖 running feed generator at http://${config.FEEDGEN_LISTENHOST}:${config.FEEDGEN_PORT}`,
   );
 }
 
