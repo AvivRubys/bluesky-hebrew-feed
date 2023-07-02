@@ -2,6 +2,7 @@ import {
   OutputSchema as RepoEvent,
   isCommit,
 } from './lexicon/types/com/atproto/sync/subscribeRepos';
+import logger from './logger';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
 
 const hebrewLetters = new Set('אבגדהוזחטיכךלמםנןסעפףצץקרשת'.split(''));
@@ -29,6 +30,10 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
           indexedAt: new Date().toISOString(),
         };
       });
+
+    if (postsToCreate.length) {
+      logger.info('Creating %d posts', postsToCreate.length);
+    }
 
     if (postsToDelete.length > 0) {
       await this.db

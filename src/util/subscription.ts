@@ -12,6 +12,8 @@ import {
   isCommit,
 } from '../lexicon/types/com/atproto/sync/subscribeRepos';
 import { Database } from '../db';
+import logger from '../logger';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
@@ -46,6 +48,13 @@ export abstract class FirehoseSubscriptionBase {
         }
         // update stored cursor every 20 events or so
         if (isCommit(evt) && evt.seq % 20 === 0) {
+          logger.info(
+            'Handled commits from %s',
+            formatDistanceToNowStrict(new Date(evt.time), {
+              addSuffix: true,
+              unit: 'minute',
+            }),
+          );
           await this.updateCursor(evt.seq);
         }
       }
@@ -59,11 +68,18 @@ export abstract class FirehoseSubscriptionBase {
   }
 
   async updateCursor(cursor: number) {
-    await this.db
+    const res = await this.db
       .updateTable('sub_state')
       .set({ cursor })
-      .where('service', '=', this.service)
-      .execute();
+      .where('service', '==', this.service)
+      .executeTakeFirst();
+
+    if (res.numUpdatedRows === BigInt(0)) {
+      await this.db
+        .insertInto('sub_state')
+        .values({ service: this.service, cursor })
+        .execute();
+    }
   }
 
   async getCursor(): Promise<{ cursor?: number }> {
