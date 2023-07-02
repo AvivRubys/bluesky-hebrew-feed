@@ -1,13 +1,11 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { sql } from 'kysely';
+import { AsyncIterable } from 'ix';
 import { Subscription } from '@atproto/xrpc-server';
 import { cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
 import { ids, lexicons } from '../lexicon/lexicons';
 import { Record as PostRecord } from '../lexicon/types/app/bsky/feed/post';
-import { Record as RepostRecord } from '../lexicon/types/app/bsky/feed/repost';
-import { Record as LikeRecord } from '../lexicon/types/app/bsky/feed/like';
-import { Record as FollowRecord } from '../lexicon/types/app/bsky/graph/follow';
 import {
   Commit,
   OutputSchema as RepoEvent,
@@ -37,27 +35,33 @@ export abstract class FirehoseSubscriptionBase {
     });
   }
 
-  abstract handleEvent(evt: RepoEvent): Promise<void>;
+  abstract handleCommits(commits: Commit[]): Promise<void>;
+
+  async handleCommitsSafe(commits: Commit[]): Promise<void> {
+    try {
+      await this.handleCommits(commits);
+    } catch (err) {
+      logger.error(err, 'repo subscription could not handle message');
+    }
+  }
 
   async run(subscriptionReconnectDelay: number) {
     try {
-      for await (const evt of this.sub) {
-        try {
-          await this.handleEvent(evt);
-        } catch (err) {
-          logger.error(err, 'repo subscription could not handle message');
-        }
+      for await (const commits of AsyncIterable.from(this.sub)
+        .filter(isCommit)
+        .buffer(200)) {
+        await this.handleCommitsSafe(commits);
 
-        if (isCommit(evt) && evt.seq % 100 === 0) {
-          logger.info(
-            'Handled commits from %s',
-            formatDistanceToNowStrict(new Date(evt.time), {
-              addSuffix: true,
-              unit: 'minute',
-            }),
-          );
-          await this.updateCursor(evt.seq);
-        }
+        const lastEvent = commits[commits.length - 1];
+        logger.info(
+          'Handled %d commits from %s',
+          commits.length,
+          formatDistanceToNowStrict(new Date(lastEvent.time), {
+            addSuffix: true,
+            unit: 'minute',
+          }),
+        );
+        await this.updateCursor(lastEvent.seq);
       }
     } catch (err) {
       logger.error(err, 'repo subscription errored');
@@ -91,9 +95,6 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
   const car = await readCar(evt.blocks);
   const opsByType: OperationsByType = {
     posts: { creates: [], deletes: [] },
-    reposts: { creates: [], deletes: [] },
-    likes: { creates: [], deletes: [] },
-    follows: { creates: [], deletes: [] },
   };
 
   for (const op of evt.ops) {
@@ -125,9 +126,6 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
 
 type OperationsByType = {
   posts: Operations<PostRecord>;
-  reposts: Operations<RepostRecord>;
-  likes: Operations<LikeRecord>;
-  follows: Operations<FollowRecord>;
 };
 
 type Operations<T = Record<string, unknown>> = {
