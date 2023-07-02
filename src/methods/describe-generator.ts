@@ -4,10 +4,12 @@ import algos from '../algos'
 import { AtUri } from '@atproto/uri'
 
 export default function (server: Server, ctx: AppContext) {
+  const serviceDid = `did:web:${ctx.cfg.FEEDGEN_HOSTNAME}`
+
   server.app.bsky.feed.describeFeedGenerator(async () => {
     const feeds = Object.keys(algos).map((shortname) => ({
       uri: AtUri.make(
-        ctx.cfg.publisherDid,
+        ctx.cfg.FEEDGEN_PUBLISHER_DID,
         'app.bsky.feed.generator',
         shortname,
       ).toString(),
@@ -15,7 +17,7 @@ export default function (server: Server, ctx: AppContext) {
     return {
       encoding: 'application/json',
       body: {
-        did: ctx.cfg.serviceDid,
+        did: serviceDid,
         feeds,
       },
     }
