@@ -1,6 +1,7 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { sql } from 'kysely';
 import { AsyncIterable } from 'ix';
+import { interval } from 'ix/asynciterable';
 import { Subscription } from '@atproto/xrpc-server';
 import { cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
@@ -37,38 +38,36 @@ export abstract class FirehoseSubscriptionBase {
 
   abstract handleCommits(commits: Commit[]): Promise<void>;
 
-  async handleCommitsSafe(commits: Commit[]): Promise<void> {
-    try {
-      await this.handleCommits(commits);
-    } catch (err) {
-      logger.error(err, 'repo subscription could not handle message');
+  async processSubscription() {
+    for await (const commits of AsyncIterable.from(this.sub)
+      .filter(isCommit)
+      .buffer(2000)) {
+      try {
+        await this.handleCommits(commits);
+      } catch (err) {
+        logger.error(err, 'repo subscription could not handle message');
+      }
+
+      const lastEvent = commits[commits.length - 1];
+      logger.info(
+        'Handled %d commits from %s',
+        commits.length,
+        formatDistanceToNowStrict(new Date(lastEvent.time), {
+          addSuffix: true,
+          unit: 'minute',
+        }),
+      );
+      await this.updateCursor(lastEvent.seq);
     }
   }
 
   async run(subscriptionReconnectDelay: number) {
-    try {
-      for await (const commits of AsyncIterable.from(this.sub)
-        .filter(isCommit)
-        .buffer(200)) {
-        await this.handleCommitsSafe(commits);
-
-        const lastEvent = commits[commits.length - 1];
-        logger.info(
-          'Handled %d commits from %s',
-          commits.length,
-          formatDistanceToNowStrict(new Date(lastEvent.time), {
-            addSuffix: true,
-            unit: 'minute',
-          }),
-        );
-        await this.updateCursor(lastEvent.seq);
+    for await (const _ of interval(subscriptionReconnectDelay)) {
+      try {
+        await this.processSubscription();
+      } catch (err) {
+        logger.error(err, 'repo subscription errored');
       }
-    } catch (err) {
-      logger.error(err, 'repo subscription errored');
-      setTimeout(
-        () => this.run(subscriptionReconnectDelay),
-        subscriptionReconnectDelay,
-      );
     }
   }
 
