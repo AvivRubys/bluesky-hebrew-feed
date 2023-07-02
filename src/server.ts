@@ -55,11 +55,8 @@ export class FeedGenerator {
 
   async start(): Promise<http.Server> {
     await migrateToLatest(this.db);
-    this.firehose.run(this.cfg.FEEDGEN_SUBSCRIPTION_RECONNECT_DELAY);
-    this.server = this.app.listen(
-      this.cfg.FEEDGEN_PORT,
-      this.cfg.FEEDGEN_LISTENHOST,
-    );
+    this.firehose.run(this.cfg.SUBSCRIPTION_RECONNECT_DELAY);
+    this.server = this.app.listen(this.cfg.PORT, this.cfg.HOST);
     await events.once(this.server, 'listening');
     return this.server;
   }

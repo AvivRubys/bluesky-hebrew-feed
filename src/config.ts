@@ -7,13 +7,13 @@ export type AppContext = {
 };
 
 const envSchema = z.object({
-  FEEDGEN_PORT: z.number().default(3000),
-  FEEDGEN_LISTENHOST: z.string().default('localhost'),
+  PORT: z.coerce.number().default(3000),
+  HOST: z.string().default('localhost'),
   FEEDGEN_SQLITE_LOCATION: z.string().default(':memory:'),
   FEEDGEN_SUBSCRIPTION_ENDPOINT: z.string().default('wss://bsky.social'),
   FEEDGEN_HOSTNAME: z.string().default('example.com'),
   FEEDGEN_PUBLISHER_DID: z.string(),
-  FEEDGEN_SUBSCRIPTION_RECONNECT_DELAY: z.number().default(3000),
+  SUBSCRIPTION_RECONNECT_DELAY: z.number().default(3000),
 });
 
 export function parseEnvironment() {
