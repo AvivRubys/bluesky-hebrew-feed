@@ -4,9 +4,12 @@ import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
 
 export const createDb = (location: string): Database => {
+  const database = new SqliteDb(location);
+  database.pragma('journal_mode = WAL');
+
   return new Kysely<DatabaseSchema>({
     dialect: new SqliteDialect({
-      database: new SqliteDb(location),
+      database,
     }),
   });
 };
