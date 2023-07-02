@@ -1,14 +1,12 @@
-import { Kysely, Migration, MigrationProvider } from 'kysely';
-
-const migrations: Record<string, Migration> = {};
+import { Kysely, MigrationProvider } from 'kysely';
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
-    return migrations;
+    return { '001': createTables };
   },
 };
 
-migrations['001'] = {
+const createTables = {
   async up(db: Kysely<unknown>) {
     await db.schema
       .createTable('post')
