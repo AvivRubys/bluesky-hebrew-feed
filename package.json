@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@atproto/api": "^0.3.13",
-    "@atproto/did-resolver": "^0.1.0",
     "@atproto/lexicon": "^0.1.0",
     "@atproto/repo": "^0.1.0",
     "@atproto/uri": "^0.0.2",

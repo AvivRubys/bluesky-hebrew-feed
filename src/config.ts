@@ -1,10 +1,8 @@
 import { z } from 'zod';
-import { DidResolver } from '@atproto/did-resolver';
 import { Database } from './db';
 
 export type AppContext = {
   db: Database;
-  didResolver: DidResolver;
   cfg: Config;
 };
 

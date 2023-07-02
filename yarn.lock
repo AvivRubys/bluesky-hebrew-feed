@@ -44,7 +44,7 @@
     one-webcrypto "^1.0.3"
     uint8arrays "3.0.0"
 
-"@atproto/did-resolver@*", "@atproto/did-resolver@^0.1.0":
+"@atproto/did-resolver@*":
   version "0.1.0"
   resolved "https://registry.npmjs.org/@atproto/did-resolver/-/did-resolver-0.1.0.tgz"
   integrity sha512-ztljyMMCqXvJSi/Qqa2zEQFvOm1AUUR7Bybr3cM1BCddbhW46gk6/g8BgdZeDt2sMBdye37qTctR9O/FjhigvQ==

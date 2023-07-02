@@ -33,12 +33,6 @@ export class FeedGenerator {
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
     );
 
-    const didCache = new MemoryCache();
-    const didResolver = new DidResolver(
-      { plcUrl: 'https://plc.directory' },
-      didCache,
-    );
-
     const server = createServer({
       validateResponse: true,
       payload: {
@@ -49,7 +43,6 @@ export class FeedGenerator {
     });
     const ctx: AppContext = {
       db,
-      didResolver,
       cfg,
     };
     feedGeneration(server, ctx);
