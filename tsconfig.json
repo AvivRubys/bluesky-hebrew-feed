@@ -1,9 +1,6 @@
-
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-    ],
+    "lib": ["ESNext"],
     "outDir": "dist",
     "module": "CommonJS",
     "target": "ES6",
@@ -15,7 +12,5 @@
     "skipLibCheck": true
   },
   "include": ["./src/**/*.ts"],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

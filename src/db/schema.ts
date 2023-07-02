@@ -1,17 +1,17 @@
 export type DatabaseSchema = {
-  post: Post
-  sub_state: SubState
-}
+  post: Post;
+  sub_state: SubState;
+};
 
 export type Post = {
-  uri: string
-  cid: string
-  replyParent: string | null
-  replyRoot: string | null
-  indexedAt: string
-}
+  uri: string;
+  cid: string;
+  replyParent: string | null;
+  replyRoot: string | null;
+  indexedAt: string;
+};
 
 export type SubState = {
-  service: string
-  cursor: number
-}
+  service: string;
+  cursor: number;
+};

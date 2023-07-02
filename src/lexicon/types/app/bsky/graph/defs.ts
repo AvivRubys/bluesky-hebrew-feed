@@ -1,21 +1,21 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { ValidationResult, BlobRef } from '@atproto/lexicon'
-import { lexicons } from '../../../../lexicons'
-import { isObj, hasProp } from '../../../../util'
-import { CID } from 'multiformats/cid'
-import * as AppBskyActorDefs from '../actor/defs'
-import * as AppBskyRichtextFacet from '../richtext/facet'
+import { ValidationResult, BlobRef } from '@atproto/lexicon';
+import { lexicons } from '../../../../lexicons';
+import { isObj, hasProp } from '../../../../util';
+import { CID } from 'multiformats/cid';
+import * as AppBskyActorDefs from '../actor/defs';
+import * as AppBskyRichtextFacet from '../richtext/facet';
 
 export interface ListViewBasic {
-  uri: string
-  name: string
-  purpose: ListPurpose
-  avatar?: string
-  viewer?: ListViewerState
-  indexedAt?: string
-  [k: string]: unknown
+  uri: string;
+  name: string;
+  purpose: ListPurpose;
+  avatar?: string;
+  viewer?: ListViewerState;
+  indexedAt?: string;
+  [k: string]: unknown;
 }
 
 export function isListViewBasic(v: unknown): v is ListViewBasic {
@@ -23,24 +23,24 @@ export function isListViewBasic(v: unknown): v is ListViewBasic {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.graph.defs#listViewBasic'
-  )
+  );
 }
 
 export function validateListViewBasic(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.graph.defs#listViewBasic', v)
+  return lexicons.validate('app.bsky.graph.defs#listViewBasic', v);
 }
 
 export interface ListView {
-  uri: string
-  creator: AppBskyActorDefs.ProfileView
-  name: string
-  purpose: ListPurpose
-  description?: string
-  descriptionFacets?: AppBskyRichtextFacet.Main[]
-  avatar?: string
-  viewer?: ListViewerState
-  indexedAt: string
-  [k: string]: unknown
+  uri: string;
+  creator: AppBskyActorDefs.ProfileView;
+  name: string;
+  purpose: ListPurpose;
+  description?: string;
+  descriptionFacets?: AppBskyRichtextFacet.Main[];
+  avatar?: string;
+  viewer?: ListViewerState;
+  indexedAt: string;
+  [k: string]: unknown;
 }
 
 export function isListView(v: unknown): v is ListView {
@@ -48,16 +48,16 @@ export function isListView(v: unknown): v is ListView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.graph.defs#listView'
-  )
+  );
 }
 
 export function validateListView(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.graph.defs#listView', v)
+  return lexicons.validate('app.bsky.graph.defs#listView', v);
 }
 
 export interface ListItemView {
-  subject: AppBskyActorDefs.ProfileView
-  [k: string]: unknown
+  subject: AppBskyActorDefs.ProfileView;
+  [k: string]: unknown;
 }
 
 export function isListItemView(v: unknown): v is ListItemView {
@@ -65,21 +65,21 @@ export function isListItemView(v: unknown): v is ListItemView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.graph.defs#listItemView'
-  )
+  );
 }
 
 export function validateListItemView(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.graph.defs#listItemView', v)
+  return lexicons.validate('app.bsky.graph.defs#listItemView', v);
 }
 
-export type ListPurpose = 'app.bsky.graph.defs#modlist' | (string & {})
+export type ListPurpose = 'app.bsky.graph.defs#modlist' | (string & {});
 
 /** A list of actors to apply an aggregate moderation action (mute/block) on */
-export const MODLIST = 'app.bsky.graph.defs#modlist'
+export const MODLIST = 'app.bsky.graph.defs#modlist';
 
 export interface ListViewerState {
-  muted?: boolean
-  [k: string]: unknown
+  muted?: boolean;
+  [k: string]: unknown;
 }
 
 export function isListViewerState(v: unknown): v is ListViewerState {
@@ -87,9 +87,9 @@ export function isListViewerState(v: unknown): v is ListViewerState {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.graph.defs#listViewerState'
-  )
+  );
 }
 
 export function validateListViewerState(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.graph.defs#listViewerState', v)
+  return lexicons.validate('app.bsky.graph.defs#listViewerState', v);
 }

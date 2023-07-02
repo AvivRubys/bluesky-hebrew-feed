@@ -1,7 +1,7 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { LexiconDoc, Lexicons } from '@atproto/lexicon'
+import { LexiconDoc, Lexicons } from '@atproto/lexicon';
 
 export const schemaDict = {
   ComAtprotoAdminDefs: {
@@ -6171,9 +6171,9 @@ export const schemaDict = {
       },
     },
   },
-}
-export const schemas: LexiconDoc[] = Object.values(schemaDict) as LexiconDoc[]
-export const lexicons: Lexicons = new Lexicons(schemas)
+};
+export const schemas: LexiconDoc[] = Object.values(schemaDict) as LexiconDoc[];
+export const lexicons: Lexicons = new Lexicons(schemas);
 export const ids = {
   ComAtprotoAdminDefs: 'com.atproto.admin.defs',
   ComAtprotoAdminDisableAccountInvites:
@@ -6298,4 +6298,4 @@ export const ids = {
   AppBskyNotificationUpdateSeen: 'app.bsky.notification.updateSeen',
   AppBskyRichtextFacet: 'app.bsky.richtext.facet',
   AppBskyUnspeccedGetPopular: 'app.bsky.unspecced.getPopular',
-}
+};

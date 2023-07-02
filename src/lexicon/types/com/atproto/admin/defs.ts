@@ -1,31 +1,31 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { ValidationResult, BlobRef } from '@atproto/lexicon'
-import { lexicons } from '../../../../lexicons'
-import { isObj, hasProp } from '../../../../util'
-import { CID } from 'multiformats/cid'
-import * as ComAtprotoRepoStrongRef from '../repo/strongRef'
-import * as ComAtprotoModerationDefs from '../moderation/defs'
-import * as ComAtprotoServerDefs from '../server/defs'
-import * as ComAtprotoLabelDefs from '../label/defs'
+import { ValidationResult, BlobRef } from '@atproto/lexicon';
+import { lexicons } from '../../../../lexicons';
+import { isObj, hasProp } from '../../../../util';
+import { CID } from 'multiformats/cid';
+import * as ComAtprotoRepoStrongRef from '../repo/strongRef';
+import * as ComAtprotoModerationDefs from '../moderation/defs';
+import * as ComAtprotoServerDefs from '../server/defs';
+import * as ComAtprotoLabelDefs from '../label/defs';
 
 export interface ActionView {
-  id: number
-  action: ActionType
+  id: number;
+  action: ActionType;
   subject:
     | RepoRef
     | ComAtprotoRepoStrongRef.Main
-    | { $type: string; [k: string]: unknown }
-  subjectBlobCids: string[]
-  createLabelVals?: string[]
-  negateLabelVals?: string[]
-  reason: string
-  createdBy: string
-  createdAt: string
-  reversal?: ActionReversal
-  resolvedReportIds: number[]
-  [k: string]: unknown
+    | { $type: string; [k: string]: unknown };
+  subjectBlobCids: string[];
+  createLabelVals?: string[];
+  negateLabelVals?: string[];
+  reason: string;
+  createdBy: string;
+  createdAt: string;
+  reversal?: ActionReversal;
+  resolvedReportIds: number[];
+  [k: string]: unknown;
 }
 
 export function isActionView(v: unknown): v is ActionView {
@@ -33,26 +33,26 @@ export function isActionView(v: unknown): v is ActionView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#actionView'
-  )
+  );
 }
 
 export function validateActionView(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#actionView', v)
+  return lexicons.validate('com.atproto.admin.defs#actionView', v);
 }
 
 export interface ActionViewDetail {
-  id: number
-  action: ActionType
-  subject: RepoView | RecordView | { $type: string; [k: string]: unknown }
-  subjectBlobs: BlobView[]
-  createLabelVals?: string[]
-  negateLabelVals?: string[]
-  reason: string
-  createdBy: string
-  createdAt: string
-  reversal?: ActionReversal
-  resolvedReports: ReportView[]
-  [k: string]: unknown
+  id: number;
+  action: ActionType;
+  subject: RepoView | RecordView | { $type: string; [k: string]: unknown };
+  subjectBlobs: BlobView[];
+  createLabelVals?: string[];
+  negateLabelVals?: string[];
+  reason: string;
+  createdBy: string;
+  createdAt: string;
+  reversal?: ActionReversal;
+  resolvedReports: ReportView[];
+  [k: string]: unknown;
 }
 
 export function isActionViewDetail(v: unknown): v is ActionViewDetail {
@@ -60,17 +60,17 @@ export function isActionViewDetail(v: unknown): v is ActionViewDetail {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#actionViewDetail'
-  )
+  );
 }
 
 export function validateActionViewDetail(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#actionViewDetail', v)
+  return lexicons.validate('com.atproto.admin.defs#actionViewDetail', v);
 }
 
 export interface ActionViewCurrent {
-  id: number
-  action: ActionType
-  [k: string]: unknown
+  id: number;
+  action: ActionType;
+  [k: string]: unknown;
 }
 
 export function isActionViewCurrent(v: unknown): v is ActionViewCurrent {
@@ -78,18 +78,18 @@ export function isActionViewCurrent(v: unknown): v is ActionViewCurrent {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#actionViewCurrent'
-  )
+  );
 }
 
 export function validateActionViewCurrent(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#actionViewCurrent', v)
+  return lexicons.validate('com.atproto.admin.defs#actionViewCurrent', v);
 }
 
 export interface ActionReversal {
-  reason: string
-  createdBy: string
-  createdAt: string
-  [k: string]: unknown
+  reason: string;
+  createdBy: string;
+  createdAt: string;
+  [k: string]: unknown;
 }
 
 export function isActionReversal(v: unknown): v is ActionReversal {
@@ -97,11 +97,11 @@ export function isActionReversal(v: unknown): v is ActionReversal {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#actionReversal'
-  )
+  );
 }
 
 export function validateActionReversal(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#actionReversal', v)
+  return lexicons.validate('com.atproto.admin.defs#actionReversal', v);
 }
 
 export type ActionType =
@@ -109,29 +109,29 @@ export type ActionType =
   | 'lex:com.atproto.admin.defs#flag'
   | 'lex:com.atproto.admin.defs#acknowledge'
   | 'lex:com.atproto.admin.defs#escalate'
-  | (string & {})
+  | (string & {});
 
 /** Moderation action type: Takedown. Indicates that content should not be served by the PDS. */
-export const TAKEDOWN = 'com.atproto.admin.defs#takedown'
+export const TAKEDOWN = 'com.atproto.admin.defs#takedown';
 /** Moderation action type: Flag. Indicates that the content was reviewed and considered to violate PDS rules, but may still be served. */
-export const FLAG = 'com.atproto.admin.defs#flag'
+export const FLAG = 'com.atproto.admin.defs#flag';
 /** Moderation action type: Acknowledge. Indicates that the content was reviewed and not considered to violate PDS rules. */
-export const ACKNOWLEDGE = 'com.atproto.admin.defs#acknowledge'
+export const ACKNOWLEDGE = 'com.atproto.admin.defs#acknowledge';
 /** Moderation action type: Escalate. Indicates that the content has been flagged for additional review. */
-export const ESCALATE = 'com.atproto.admin.defs#escalate'
+export const ESCALATE = 'com.atproto.admin.defs#escalate';
 
 export interface ReportView {
-  id: number
-  reasonType: ComAtprotoModerationDefs.ReasonType
-  reason?: string
+  id: number;
+  reasonType: ComAtprotoModerationDefs.ReasonType;
+  reason?: string;
   subject:
     | RepoRef
     | ComAtprotoRepoStrongRef.Main
-    | { $type: string; [k: string]: unknown }
-  reportedBy: string
-  createdAt: string
-  resolvedByActionIds: number[]
-  [k: string]: unknown
+    | { $type: string; [k: string]: unknown };
+  reportedBy: string;
+  createdAt: string;
+  resolvedByActionIds: number[];
+  [k: string]: unknown;
 }
 
 export function isReportView(v: unknown): v is ReportView {
@@ -139,22 +139,22 @@ export function isReportView(v: unknown): v is ReportView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#reportView'
-  )
+  );
 }
 
 export function validateReportView(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#reportView', v)
+  return lexicons.validate('com.atproto.admin.defs#reportView', v);
 }
 
 export interface ReportViewDetail {
-  id: number
-  reasonType: ComAtprotoModerationDefs.ReasonType
-  reason?: string
-  subject: RepoView | RecordView | { $type: string; [k: string]: unknown }
-  reportedBy: string
-  createdAt: string
-  resolvedByActions: ActionView[]
-  [k: string]: unknown
+  id: number;
+  reasonType: ComAtprotoModerationDefs.ReasonType;
+  reason?: string;
+  subject: RepoView | RecordView | { $type: string; [k: string]: unknown };
+  reportedBy: string;
+  createdAt: string;
+  resolvedByActions: ActionView[];
+  [k: string]: unknown;
 }
 
 export function isReportViewDetail(v: unknown): v is ReportViewDetail {
@@ -162,23 +162,23 @@ export function isReportViewDetail(v: unknown): v is ReportViewDetail {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#reportViewDetail'
-  )
+  );
 }
 
 export function validateReportViewDetail(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#reportViewDetail', v)
+  return lexicons.validate('com.atproto.admin.defs#reportViewDetail', v);
 }
 
 export interface RepoView {
-  did: string
-  handle: string
-  email?: string
-  relatedRecords: {}[]
-  indexedAt: string
-  moderation: Moderation
-  invitedBy?: ComAtprotoServerDefs.InviteCode
-  invitesDisabled?: boolean
-  [k: string]: unknown
+  did: string;
+  handle: string;
+  email?: string;
+  relatedRecords: {}[];
+  indexedAt: string;
+  moderation: Moderation;
+  invitedBy?: ComAtprotoServerDefs.InviteCode;
+  invitesDisabled?: boolean;
+  [k: string]: unknown;
 }
 
 export function isRepoView(v: unknown): v is RepoView {
@@ -186,25 +186,25 @@ export function isRepoView(v: unknown): v is RepoView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#repoView'
-  )
+  );
 }
 
 export function validateRepoView(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#repoView', v)
+  return lexicons.validate('com.atproto.admin.defs#repoView', v);
 }
 
 export interface RepoViewDetail {
-  did: string
-  handle: string
-  email?: string
-  relatedRecords: {}[]
-  indexedAt: string
-  moderation: ModerationDetail
-  labels?: ComAtprotoLabelDefs.Label[]
-  invitedBy?: ComAtprotoServerDefs.InviteCode
-  invites?: ComAtprotoServerDefs.InviteCode[]
-  invitesDisabled?: boolean
-  [k: string]: unknown
+  did: string;
+  handle: string;
+  email?: string;
+  relatedRecords: {}[];
+  indexedAt: string;
+  moderation: ModerationDetail;
+  labels?: ComAtprotoLabelDefs.Label[];
+  invitedBy?: ComAtprotoServerDefs.InviteCode;
+  invites?: ComAtprotoServerDefs.InviteCode[];
+  invitesDisabled?: boolean;
+  [k: string]: unknown;
 }
 
 export function isRepoViewDetail(v: unknown): v is RepoViewDetail {
@@ -212,16 +212,16 @@ export function isRepoViewDetail(v: unknown): v is RepoViewDetail {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#repoViewDetail'
-  )
+  );
 }
 
 export function validateRepoViewDetail(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#repoViewDetail', v)
+  return lexicons.validate('com.atproto.admin.defs#repoViewDetail', v);
 }
 
 export interface RepoRef {
-  did: string
-  [k: string]: unknown
+  did: string;
+  [k: string]: unknown;
 }
 
 export function isRepoRef(v: unknown): v is RepoRef {
@@ -229,22 +229,22 @@ export function isRepoRef(v: unknown): v is RepoRef {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#repoRef'
-  )
+  );
 }
 
 export function validateRepoRef(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#repoRef', v)
+  return lexicons.validate('com.atproto.admin.defs#repoRef', v);
 }
 
 export interface RecordView {
-  uri: string
-  cid: string
-  value: {}
-  blobCids: string[]
-  indexedAt: string
-  moderation: Moderation
-  repo: RepoView
-  [k: string]: unknown
+  uri: string;
+  cid: string;
+  value: {};
+  blobCids: string[];
+  indexedAt: string;
+  moderation: Moderation;
+  repo: RepoView;
+  [k: string]: unknown;
 }
 
 export function isRecordView(v: unknown): v is RecordView {
@@ -252,23 +252,23 @@ export function isRecordView(v: unknown): v is RecordView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#recordView'
-  )
+  );
 }
 
 export function validateRecordView(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#recordView', v)
+  return lexicons.validate('com.atproto.admin.defs#recordView', v);
 }
 
 export interface RecordViewDetail {
-  uri: string
-  cid: string
-  value: {}
-  blobs: BlobView[]
-  labels?: ComAtprotoLabelDefs.Label[]
-  indexedAt: string
-  moderation: ModerationDetail
-  repo: RepoView
-  [k: string]: unknown
+  uri: string;
+  cid: string;
+  value: {};
+  blobs: BlobView[];
+  labels?: ComAtprotoLabelDefs.Label[];
+  indexedAt: string;
+  moderation: ModerationDetail;
+  repo: RepoView;
+  [k: string]: unknown;
 }
 
 export function isRecordViewDetail(v: unknown): v is RecordViewDetail {
@@ -276,16 +276,16 @@ export function isRecordViewDetail(v: unknown): v is RecordViewDetail {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#recordViewDetail'
-  )
+  );
 }
 
 export function validateRecordViewDetail(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#recordViewDetail', v)
+  return lexicons.validate('com.atproto.admin.defs#recordViewDetail', v);
 }
 
 export interface Moderation {
-  currentAction?: ActionViewCurrent
-  [k: string]: unknown
+  currentAction?: ActionViewCurrent;
+  [k: string]: unknown;
 }
 
 export function isModeration(v: unknown): v is Moderation {
@@ -293,18 +293,18 @@ export function isModeration(v: unknown): v is Moderation {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#moderation'
-  )
+  );
 }
 
 export function validateModeration(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#moderation', v)
+  return lexicons.validate('com.atproto.admin.defs#moderation', v);
 }
 
 export interface ModerationDetail {
-  currentAction?: ActionViewCurrent
-  actions: ActionView[]
-  reports: ReportView[]
-  [k: string]: unknown
+  currentAction?: ActionViewCurrent;
+  actions: ActionView[];
+  reports: ReportView[];
+  [k: string]: unknown;
 }
 
 export function isModerationDetail(v: unknown): v is ModerationDetail {
@@ -312,24 +312,24 @@ export function isModerationDetail(v: unknown): v is ModerationDetail {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#moderationDetail'
-  )
+  );
 }
 
 export function validateModerationDetail(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#moderationDetail', v)
+  return lexicons.validate('com.atproto.admin.defs#moderationDetail', v);
 }
 
 export interface BlobView {
-  cid: string
-  mimeType: string
-  size: number
-  createdAt: string
+  cid: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
   details?:
     | ImageDetails
     | VideoDetails
-    | { $type: string; [k: string]: unknown }
-  moderation?: Moderation
-  [k: string]: unknown
+    | { $type: string; [k: string]: unknown };
+  moderation?: Moderation;
+  [k: string]: unknown;
 }
 
 export function isBlobView(v: unknown): v is BlobView {
@@ -337,17 +337,17 @@ export function isBlobView(v: unknown): v is BlobView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#blobView'
-  )
+  );
 }
 
 export function validateBlobView(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#blobView', v)
+  return lexicons.validate('com.atproto.admin.defs#blobView', v);
 }
 
 export interface ImageDetails {
-  width: number
-  height: number
-  [k: string]: unknown
+  width: number;
+  height: number;
+  [k: string]: unknown;
 }
 
 export function isImageDetails(v: unknown): v is ImageDetails {
@@ -355,18 +355,18 @@ export function isImageDetails(v: unknown): v is ImageDetails {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#imageDetails'
-  )
+  );
 }
 
 export function validateImageDetails(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#imageDetails', v)
+  return lexicons.validate('com.atproto.admin.defs#imageDetails', v);
 }
 
 export interface VideoDetails {
-  width: number
-  height: number
-  length: number
-  [k: string]: unknown
+  width: number;
+  height: number;
+  length: number;
+  [k: string]: unknown;
 }
 
 export function isVideoDetails(v: unknown): v is VideoDetails {
@@ -374,9 +374,9 @@ export function isVideoDetails(v: unknown): v is VideoDetails {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'com.atproto.admin.defs#videoDetails'
-  )
+  );
 }
 
 export function validateVideoDetails(v: unknown): ValidationResult {
-  return lexicons.validate('com.atproto.admin.defs#videoDetails', v)
+  return lexicons.validate('com.atproto.admin.defs#videoDetails', v);
 }

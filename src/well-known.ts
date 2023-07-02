@@ -1,9 +1,9 @@
-import express from 'express'
-import { AppContext } from './config'
+import express from 'express';
+import { AppContext } from './config';
 
 const makeRouter = (ctx: AppContext) => {
-  const router = express.Router()
-  const serviceDid = `did:web:${ctx.cfg.FEEDGEN_HOSTNAME}`
+  const router = express.Router();
+  const serviceDid = `did:web:${ctx.cfg.FEEDGEN_HOSTNAME}`;
 
   router.get('/.well-known/did.json', (_req, res) => {
     res.json({
@@ -16,9 +16,9 @@ const makeRouter = (ctx: AppContext) => {
           serviceEndpoint: `https://${ctx.cfg.FEEDGEN_HOSTNAME}`,
         },
       ],
-    })
-  })
+    });
+  });
 
-  return router
-}
-export default makeRouter
+  return router;
+};
+export default makeRouter;

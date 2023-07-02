@@ -1,52 +1,52 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { ValidationResult, BlobRef } from '@atproto/lexicon'
-import { lexicons } from '../../../../lexicons'
-import { isObj, hasProp } from '../../../../util'
-import { CID } from 'multiformats/cid'
-import * as AppBskyActorDefs from '../actor/defs'
-import * as AppBskyEmbedImages from '../embed/images'
-import * as AppBskyEmbedExternal from '../embed/external'
-import * as AppBskyEmbedRecord from '../embed/record'
-import * as AppBskyEmbedRecordWithMedia from '../embed/recordWithMedia'
-import * as ComAtprotoLabelDefs from '../../../com/atproto/label/defs'
-import * as AppBskyRichtextFacet from '../richtext/facet'
+import { ValidationResult, BlobRef } from '@atproto/lexicon';
+import { lexicons } from '../../../../lexicons';
+import { isObj, hasProp } from '../../../../util';
+import { CID } from 'multiformats/cid';
+import * as AppBskyActorDefs from '../actor/defs';
+import * as AppBskyEmbedImages from '../embed/images';
+import * as AppBskyEmbedExternal from '../embed/external';
+import * as AppBskyEmbedRecord from '../embed/record';
+import * as AppBskyEmbedRecordWithMedia from '../embed/recordWithMedia';
+import * as ComAtprotoLabelDefs from '../../../com/atproto/label/defs';
+import * as AppBskyRichtextFacet from '../richtext/facet';
 
 export interface PostView {
-  uri: string
-  cid: string
-  author: AppBskyActorDefs.ProfileViewBasic
-  record: {}
+  uri: string;
+  cid: string;
+  author: AppBskyActorDefs.ProfileViewBasic;
+  record: {};
   embed?:
     | AppBskyEmbedImages.View
     | AppBskyEmbedExternal.View
     | AppBskyEmbedRecord.View
     | AppBskyEmbedRecordWithMedia.View
-    | { $type: string; [k: string]: unknown }
-  replyCount?: number
-  repostCount?: number
-  likeCount?: number
-  indexedAt: string
-  viewer?: ViewerState
-  labels?: ComAtprotoLabelDefs.Label[]
-  [k: string]: unknown
+    | { $type: string; [k: string]: unknown };
+  replyCount?: number;
+  repostCount?: number;
+  likeCount?: number;
+  indexedAt: string;
+  viewer?: ViewerState;
+  labels?: ComAtprotoLabelDefs.Label[];
+  [k: string]: unknown;
 }
 
 export function isPostView(v: unknown): v is PostView {
   return (
     isObj(v) && hasProp(v, '$type') && v.$type === 'app.bsky.feed.defs#postView'
-  )
+  );
 }
 
 export function validatePostView(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#postView', v)
+  return lexicons.validate('app.bsky.feed.defs#postView', v);
 }
 
 export interface ViewerState {
-  repost?: string
-  like?: string
-  [k: string]: unknown
+  repost?: string;
+  like?: string;
+  [k: string]: unknown;
 }
 
 export function isViewerState(v: unknown): v is ViewerState {
@@ -54,18 +54,18 @@ export function isViewerState(v: unknown): v is ViewerState {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#viewerState'
-  )
+  );
 }
 
 export function validateViewerState(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#viewerState', v)
+  return lexicons.validate('app.bsky.feed.defs#viewerState', v);
 }
 
 export interface FeedViewPost {
-  post: PostView
-  reply?: ReplyRef
-  reason?: ReasonRepost | { $type: string; [k: string]: unknown }
-  [k: string]: unknown
+  post: PostView;
+  reply?: ReplyRef;
+  reason?: ReasonRepost | { $type: string; [k: string]: unknown };
+  [k: string]: unknown;
 }
 
 export function isFeedViewPost(v: unknown): v is FeedViewPost {
@@ -73,11 +73,11 @@ export function isFeedViewPost(v: unknown): v is FeedViewPost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#feedViewPost'
-  )
+  );
 }
 
 export function validateFeedViewPost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#feedViewPost', v)
+  return lexicons.validate('app.bsky.feed.defs#feedViewPost', v);
 }
 
 export interface ReplyRef {
@@ -85,29 +85,29 @@ export interface ReplyRef {
     | PostView
     | NotFoundPost
     | BlockedPost
-    | { $type: string; [k: string]: unknown }
+    | { $type: string; [k: string]: unknown };
   parent:
     | PostView
     | NotFoundPost
     | BlockedPost
-    | { $type: string; [k: string]: unknown }
-  [k: string]: unknown
+    | { $type: string; [k: string]: unknown };
+  [k: string]: unknown;
 }
 
 export function isReplyRef(v: unknown): v is ReplyRef {
   return (
     isObj(v) && hasProp(v, '$type') && v.$type === 'app.bsky.feed.defs#replyRef'
-  )
+  );
 }
 
 export function validateReplyRef(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#replyRef', v)
+  return lexicons.validate('app.bsky.feed.defs#replyRef', v);
 }
 
 export interface ReasonRepost {
-  by: AppBskyActorDefs.ProfileViewBasic
-  indexedAt: string
-  [k: string]: unknown
+  by: AppBskyActorDefs.ProfileViewBasic;
+  indexedAt: string;
+  [k: string]: unknown;
 }
 
 export function isReasonRepost(v: unknown): v is ReasonRepost {
@@ -115,27 +115,27 @@ export function isReasonRepost(v: unknown): v is ReasonRepost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#reasonRepost'
-  )
+  );
 }
 
 export function validateReasonRepost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#reasonRepost', v)
+  return lexicons.validate('app.bsky.feed.defs#reasonRepost', v);
 }
 
 export interface ThreadViewPost {
-  post: PostView
+  post: PostView;
   parent?:
     | ThreadViewPost
     | NotFoundPost
     | BlockedPost
-    | { $type: string; [k: string]: unknown }
+    | { $type: string; [k: string]: unknown };
   replies?: (
     | ThreadViewPost
     | NotFoundPost
     | BlockedPost
     | { $type: string; [k: string]: unknown }
-  )[]
-  [k: string]: unknown
+  )[];
+  [k: string]: unknown;
 }
 
 export function isThreadViewPost(v: unknown): v is ThreadViewPost {
@@ -143,17 +143,17 @@ export function isThreadViewPost(v: unknown): v is ThreadViewPost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#threadViewPost'
-  )
+  );
 }
 
 export function validateThreadViewPost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#threadViewPost', v)
+  return lexicons.validate('app.bsky.feed.defs#threadViewPost', v);
 }
 
 export interface NotFoundPost {
-  uri: string
-  notFound: true
-  [k: string]: unknown
+  uri: string;
+  notFound: true;
+  [k: string]: unknown;
 }
 
 export function isNotFoundPost(v: unknown): v is NotFoundPost {
@@ -161,17 +161,17 @@ export function isNotFoundPost(v: unknown): v is NotFoundPost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#notFoundPost'
-  )
+  );
 }
 
 export function validateNotFoundPost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#notFoundPost', v)
+  return lexicons.validate('app.bsky.feed.defs#notFoundPost', v);
 }
 
 export interface BlockedPost {
-  uri: string
-  blocked: true
-  [k: string]: unknown
+  uri: string;
+  blocked: true;
+  [k: string]: unknown;
 }
 
 export function isBlockedPost(v: unknown): v is BlockedPost {
@@ -179,26 +179,26 @@ export function isBlockedPost(v: unknown): v is BlockedPost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#blockedPost'
-  )
+  );
 }
 
 export function validateBlockedPost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#blockedPost', v)
+  return lexicons.validate('app.bsky.feed.defs#blockedPost', v);
 }
 
 export interface GeneratorView {
-  uri: string
-  cid: string
-  did?: string
-  creator: AppBskyActorDefs.ProfileView
-  displayName?: string
-  description?: string
-  descriptionFacets?: AppBskyRichtextFacet.Main[]
-  avatar?: string
-  likeCount?: number
-  viewer?: GeneratorViewerState
-  indexedAt: string
-  [k: string]: unknown
+  uri: string;
+  cid: string;
+  did?: string;
+  creator: AppBskyActorDefs.ProfileView;
+  displayName?: string;
+  description?: string;
+  descriptionFacets?: AppBskyRichtextFacet.Main[];
+  avatar?: string;
+  likeCount?: number;
+  viewer?: GeneratorViewerState;
+  indexedAt: string;
+  [k: string]: unknown;
 }
 
 export function isGeneratorView(v: unknown): v is GeneratorView {
@@ -206,17 +206,17 @@ export function isGeneratorView(v: unknown): v is GeneratorView {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#generatorView'
-  )
+  );
 }
 
 export function validateGeneratorView(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#generatorView', v)
+  return lexicons.validate('app.bsky.feed.defs#generatorView', v);
 }
 
 export interface GeneratorViewerState {
-  saved?: boolean
-  like?: string
-  [k: string]: unknown
+  saved?: boolean;
+  like?: string;
+  [k: string]: unknown;
 }
 
 export function isGeneratorViewerState(v: unknown): v is GeneratorViewerState {
@@ -224,17 +224,17 @@ export function isGeneratorViewerState(v: unknown): v is GeneratorViewerState {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#generatorViewerState'
-  )
+  );
 }
 
 export function validateGeneratorViewerState(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#generatorViewerState', v)
+  return lexicons.validate('app.bsky.feed.defs#generatorViewerState', v);
 }
 
 export interface SkeletonFeedPost {
-  post: string
-  reason?: SkeletonReasonRepost | { $type: string; [k: string]: unknown }
-  [k: string]: unknown
+  post: string;
+  reason?: SkeletonReasonRepost | { $type: string; [k: string]: unknown };
+  [k: string]: unknown;
 }
 
 export function isSkeletonFeedPost(v: unknown): v is SkeletonFeedPost {
@@ -242,16 +242,16 @@ export function isSkeletonFeedPost(v: unknown): v is SkeletonFeedPost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#skeletonFeedPost'
-  )
+  );
 }
 
 export function validateSkeletonFeedPost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#skeletonFeedPost', v)
+  return lexicons.validate('app.bsky.feed.defs#skeletonFeedPost', v);
 }
 
 export interface SkeletonReasonRepost {
-  repost: string
-  [k: string]: unknown
+  repost: string;
+  [k: string]: unknown;
 }
 
 export function isSkeletonReasonRepost(v: unknown): v is SkeletonReasonRepost {
@@ -259,9 +259,9 @@ export function isSkeletonReasonRepost(v: unknown): v is SkeletonReasonRepost {
     isObj(v) &&
     hasProp(v, '$type') &&
     v.$type === 'app.bsky.feed.defs#skeletonReasonRepost'
-  )
+  );
 }
 
 export function validateSkeletonReasonRepost(v: unknown): ValidationResult {
-  return lexicons.validate('app.bsky.feed.defs#skeletonReasonRepost', v)
+  return lexicons.validate('app.bsky.feed.defs#skeletonReasonRepost', v);
 }
