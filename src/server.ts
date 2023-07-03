@@ -1,7 +1,7 @@
 import http from 'http';
 import events from 'events';
 import express from 'express';
-import { DidResolver, MemoryCache } from '@atproto/did-resolver';
+import morgan from 'morgan';
 import { createServer } from './lexicon';
 import feedGeneration from './methods/feed-generation';
 import describeGenerator from './methods/describe-generator';
@@ -27,6 +27,7 @@ export class FeedGenerator {
 
   static create(cfg: Config) {
     const app = express();
+    app.use(morgan('combined'));
     const db = createDb(cfg.POSTGRES_CONNECTION_STRING);
     const firehose = new FirehoseSubscription(
       db,
