@@ -2,6 +2,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { sql } from 'kysely';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
+import { filter } from 'ix/asynciterable/operators';
 import { Subscription } from '@atproto/xrpc-server';
 import { cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
@@ -14,6 +15,7 @@ import {
 } from '../lexicon/types/com/atproto/sync/subscribeRepos';
 import { Database } from '../db';
 import logger from '../logger';
+import { bufferTime } from './buffer-time';
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
@@ -39,9 +41,10 @@ export abstract class FirehoseSubscriptionBase {
   abstract handleCommits(commits: Commit[]): Promise<void>;
 
   async processSubscription() {
-    for await (const commits of AsyncIterable.from(this.sub)
-      .filter(isCommit)
-      .buffer(2000)) {
+    for await (const commits of AsyncIterable.from(this.sub).pipe(
+      filter(isCommit),
+      bufferTime(1000),
+    )) {
       try {
         await this.handleCommits(commits);
       } catch (err) {
