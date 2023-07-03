@@ -9,7 +9,7 @@
   "scripts": {
     "publishFeed": "ts-node scripts/publishFeedGen.ts",
     "dev": "ts-node src/index.ts",
-    "start": "node dist/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc"
   },
   "dependencies": {
