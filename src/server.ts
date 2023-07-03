@@ -1,5 +1,6 @@
 import http from 'http';
 import events from 'events';
+import jws from 'jws';
 import express from 'express';
 import morgan from 'morgan';
 import { createServer } from './lexicon';
@@ -27,7 +28,13 @@ export class FeedGenerator {
 
   static create(cfg: Config) {
     const app = express();
-    app.use(morgan('combined'));
+    const morganWithUser = morgan.token('bsky-user', (req) =>
+      parseBearer(req.headers.authorization),
+    );
+    const loggingMiddleware = morganWithUser(
+      ':date[iso] :bsky-user ":method :url" :status',
+    );
+    app.use(loggingMiddleware);
     const db = createDb(cfg.POSTGRES_CONNECTION_STRING);
     const firehose = new FirehoseSubscription(
       db,
@@ -61,6 +68,15 @@ export class FeedGenerator {
     await events.once(this.server, 'listening');
     return this.server;
   }
+}
+
+function parseBearer(authorizationHeader?: string) {
+  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authorizationHeader.substring('Bearer '.length).trim();
+  return jws.decode(token)?.payload?.iss;
 }
 
 export default FeedGenerator;

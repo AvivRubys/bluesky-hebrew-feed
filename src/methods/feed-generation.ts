@@ -21,24 +21,10 @@ export default function (server: Server, ctx: AppContext) {
       );
     }
 
-    const did = parseBearer(req.header('authorization'));
-    if (did) {
-      logger.info('Generating feed for %s', did);
-    }
-
     const body = await algo(ctx, params);
     return {
       encoding: 'application/json',
       body: body,
     };
   });
-}
-
-function parseBearer(authorizationHeader?: string) {
-  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authorizationHeader.substring('Bearer '.length).trim();
-  return jws.decode(token)?.payload?.iss;
 }
