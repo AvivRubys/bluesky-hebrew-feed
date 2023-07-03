@@ -9,6 +9,7 @@ import { createDb, Database, migrateToLatest } from './db';
 import { FirehoseSubscription } from './subscription';
 import { AppContext, Config } from './config';
 import wellKnown from './well-known';
+import './util/configure-morgan';
 
 export class FeedGenerator {
   public server?: http.Server;
