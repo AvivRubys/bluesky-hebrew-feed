@@ -27,7 +27,7 @@ export class FeedGenerator {
 
   static create(cfg: Config) {
     const app = express();
-    const db = createDb(cfg.FEEDGEN_SQLITE_LOCATION);
+    const db = createDb(cfg.POSTGRES_CONNECTION_STRING);
     const firehose = new FirehoseSubscription(
       db,
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,

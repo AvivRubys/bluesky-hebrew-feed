@@ -9,7 +9,7 @@ export type AppContext = {
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('localhost'),
-  FEEDGEN_SQLITE_LOCATION: z.string().default(':memory:'),
+  POSTGRES_CONNECTION_STRING: z.string(),
   FEEDGEN_SUBSCRIPTION_ENDPOINT: z.string().default('wss://bsky.social'),
   FEEDGEN_HOSTNAME: z.string().default('example.com'),
   FEEDGEN_PUBLISHER_DID: z.string(),
