@@ -19,6 +19,7 @@ import { bufferTime } from './buffer-time';
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
+  public lastEventDate?: Date;
 
   constructor(public db: Database, public service: string) {
     this.sub = new Subscription({
@@ -41,6 +42,8 @@ export abstract class FirehoseSubscriptionBase {
   abstract handleCommits(commits: Commit[]): Promise<void>;
 
   async processSubscription() {
+    logger.info('Starting repo subscription...');
+
     for await (const commits of AsyncIterable.from(this.sub).pipe(
       filter(isCommit),
       bufferTime(1000),
@@ -52,10 +55,12 @@ export abstract class FirehoseSubscriptionBase {
       }
 
       const lastEvent = commits[commits.length - 1];
+      const lastEventDate = new Date(lastEvent.time);
+      this.lastEventDate = lastEventDate;
       logger.info(
         'Handled %d commits from %s',
         commits.length,
-        formatDistanceToNowStrict(new Date(lastEvent.time), {
+        formatDistanceToNowStrict(lastEventDate, {
           addSuffix: true,
           unit: 'minute',
         }),

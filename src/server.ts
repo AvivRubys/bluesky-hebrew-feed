@@ -10,6 +10,7 @@ import { FirehoseSubscription } from './subscription';
 import { AppContext, Config } from './config';
 import wellKnown from './well-known';
 import './util/configure-morgan';
+import { createHealthCheckRoute as healthCheckRoute } from './methods/health-check';
 
 export class FeedGenerator {
   public server?: http.Server;
@@ -51,6 +52,7 @@ export class FeedGenerator {
     describeGenerator(server, ctx);
     app.use(server.xrpc.router);
     app.use(wellKnown(ctx));
+    app.get('/health', healthCheckRoute(db, firehose));
 
     return new FeedGenerator(app, db, firehose, cfg);
   }
