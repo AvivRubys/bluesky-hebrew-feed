@@ -29,6 +29,7 @@
     "pg": "^8.11.1",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.0",
+    "tslib": "^2.6.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {

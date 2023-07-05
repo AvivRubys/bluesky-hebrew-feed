@@ -3,13 +3,15 @@
     "lib": ["ESNext"],
     "outDir": "dist",
     "module": "CommonJS",
+    "moduleResolution": "node",
     "target": "ES6",
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "alwaysStrict": true,
+    "strict": true,
     "allowUnreachableCode": false,
     "strictNullChecks": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "noEmitOnError": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"]
