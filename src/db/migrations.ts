@@ -2,7 +2,10 @@ import { Kysely, MigrationProvider } from 'kysely';
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
-    return { '001': createTables };
+    return {
+      '001': createTables,
+      '002': addReplyColumns,
+    };
   },
 };
 
@@ -21,8 +24,14 @@ const createTables = {
       .addColumn('cursor', 'integer', (col) => col.notNull())
       .execute();
   },
-  async down(db: Kysely<unknown>) {
-    await db.schema.dropTable('post').execute();
-    await db.schema.dropTable('sub_state').execute();
+};
+
+const addReplyColumns = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .alterTable('post')
+      .addColumn('replyRoot', 'varchar')
+      .addColumn('replyTo', 'varchar')
+      .execute();
   },
 };

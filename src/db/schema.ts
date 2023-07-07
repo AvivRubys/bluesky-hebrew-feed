@@ -7,6 +7,8 @@ export type Post = {
   uri: string;
   cid: string;
   indexedAt: string;
+  replyRoot?: string;
+  replyTo?: string;
 };
 
 export type SubState = {

@@ -29,6 +29,8 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .map((create) => ({
         uri: create.uri,
         cid: create.cid,
+        replyTo: create.record.reply?.parent.uri,
+        replyRoot: create.record.reply?.root.uri,
         indexedAt: new Date().toISOString(),
       }));
 

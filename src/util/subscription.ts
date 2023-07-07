@@ -48,13 +48,17 @@ export abstract class FirehoseSubscriptionBase {
       filter(isCommit),
       bufferTime(1000),
     )) {
+      if (commits.length === 0) {
+        continue;
+      }
+
       try {
         await this.handleCommits(commits);
       } catch (err) {
         logger.error(err, 'repo subscription could not handle message');
       }
 
-      const lastEvent = commits[commits.length - 1];
+      const lastEvent = commits.at(-1)!;
       const lastEventDate = new Date(lastEvent.time);
       this.lastEventDate = lastEventDate;
       logger.info(
