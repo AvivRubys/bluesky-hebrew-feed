@@ -1,9 +1,9 @@
 export type DatabaseSchema = {
-  post: Post;
-  sub_state: SubState;
+  post: PostSchema;
+  sub_state: SubStateSchema;
 };
 
-export type Post = {
+export type PostSchema = {
   uri: string;
   cid: string;
   indexedAt: string;
@@ -11,7 +11,7 @@ export type Post = {
   replyTo?: string;
 };
 
-export type SubState = {
+export type SubStateSchema = {
   service: string;
   cursor: number;
 };

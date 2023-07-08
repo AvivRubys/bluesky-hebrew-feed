@@ -1,10 +1,8 @@
 import { InvalidRequestError } from '@atproto/xrpc-server';
 import { AtUri } from '@atproto/uri';
-import jws from 'jws';
 import { Server } from '../lexicon';
 import { AppContext } from '../config';
 import algos from '../algos';
-import logger from '../logger';
 
 export default function (server: Server, ctx: AppContext) {
   server.app.bsky.feed.getFeedSkeleton(async ({ params, req }) => {
