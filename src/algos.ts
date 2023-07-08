@@ -49,7 +49,7 @@ async function hebrewFeedOnlyPosts(
   let builder = ctx.db
     .selectFrom('post')
     .selectAll()
-    .where('post.replyTo', 'is not', null)
+    .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
