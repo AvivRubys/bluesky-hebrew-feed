@@ -16,7 +16,7 @@
     "@atproto/api": "^0.3.13",
     "@atproto/lexicon": "^0.1.0",
     "@atproto/repo": "^0.1.0",
-    "@atproto/uri": "^0.0.2",
+    "@atproto/uri": "^0.1.0",
     "@atproto/xrpc-server": "^0.2.0",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
