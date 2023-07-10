@@ -9,6 +9,7 @@ export type PostSchema = {
   indexedAt: string;
   replyRoot?: string;
   replyTo?: string;
+  language: string;
 };
 
 export type SubStateSchema = {

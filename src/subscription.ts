@@ -1,21 +1,8 @@
-import {
-  Commit,
-  OutputSchema as RepoEvent,
-  isCommit,
-} from './lexicon/types/com/atproto/sync/subscribeRepos';
+import { AsyncIterable } from 'ix';
+import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
 import logger from './logger';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
-
-const hebrewLetters = new Set('אבגדהוזחטיכךלמםנןסעפףצץקרשת'.split(''));
-function isHebrewText(text: string) {
-  for (const letter of text) {
-    if (hebrewLetters.has(letter)) {
-      return true;
-    }
-  }
-
-  return false;
-}
+import { extractTextLanguage } from './util/hebrew';
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
@@ -23,16 +10,27 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
     const postsToDelete = ops
       .flatMap((op) => op.posts.deletes)
       .map((del) => del.uri);
-    const postsToCreate = ops
+    const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
-      .filter((create) => isHebrewText(create.record.text))
-      .map((create) => ({
-        uri: create.uri,
-        cid: create.cid,
-        replyTo: create.record.reply?.parent.uri,
-        replyRoot: create.record.reply?.root.uri,
-        indexedAt: new Date().toISOString(),
-      }));
+      .flatMap(async (create) => {
+        const language = await extractTextLanguage(create.record.text);
+
+        if (typeof language === 'undefined') {
+          return [];
+        }
+
+        return [
+          {
+            uri: create.uri,
+            cid: create.cid,
+            replyTo: create.record.reply?.parent.uri,
+            replyRoot: create.record.reply?.root.uri,
+            indexedAt: new Date().toISOString(),
+            language,
+          },
+        ];
+      })
+      .toArray();
 
     if (postsToDelete.length > 0) {
       await this.db

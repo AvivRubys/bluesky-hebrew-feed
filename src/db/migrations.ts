@@ -5,6 +5,7 @@ export const migrationProvider: MigrationProvider = {
     return {
       '001': createTables,
       '002': addReplyColumns,
+      '003': addLanguageColumn,
     };
   },
 };
@@ -32,6 +33,15 @@ const addReplyColumns = {
       .alterTable('post')
       .addColumn('replyRoot', 'varchar')
       .addColumn('replyTo', 'varchar')
+      .execute();
+  },
+};
+
+const addLanguageColumn = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .alterTable('post')
+      .addColumn('language', 'varchar', (col) => col.notNull().defaultTo('iw'))
       .execute();
   },
 };
