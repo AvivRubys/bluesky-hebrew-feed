@@ -6,6 +6,7 @@ import {
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { AppContext } from './config';
 import { DatabaseSchema, PostSchema } from './db/schema';
+import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<DatabaseSchema, 'post', T>,
@@ -49,6 +50,7 @@ async function hebrewFeedOnlyPosts(
   let builder = ctx.db
     .selectFrom('post')
     .selectAll()
+    .where('language', '=', LANG_HEBREW)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -59,13 +61,31 @@ async function hebrewFeedOnlyPosts(
   return renderFeed(await builder.execute());
 }
 
-async function hebrewFeedWithComments(
+async function hebrewFeedAll(
   ctx: AppContext,
   params: QueryParams,
 ): Promise<AlgoOutput> {
   let builder = ctx.db
     .selectFrom('post')
     .selectAll()
+    .where('language', '=', LANG_HEBREW)
+    .orderBy('indexedAt', 'desc')
+    .orderBy('cid', 'desc')
+    .limit(params.limit);
+
+  builder = addCursor(builder, params);
+
+  return renderFeed(await builder.execute());
+}
+
+async function yiddishFeedAll(
+  ctx: AppContext,
+  params: QueryParams,
+): Promise<AlgoOutput> {
+  let builder = ctx.db
+    .selectFrom('post')
+    .selectAll()
+    .where('language', '=', LANG_YIDDISH)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -81,8 +101,9 @@ type AlgoHandler = (
 ) => Promise<AlgoOutput>;
 
 const algos: Record<string, AlgoHandler> = {
-  'hebrew-feed-all': hebrewFeedOnlyPosts,
-  'hebrew-feed': hebrewFeedWithComments,
+  'yiddish-all': yiddishFeedAll,
+  'hebrew-all': hebrewFeedAll,
+  'hebrew-feed': hebrewFeedOnlyPosts,
 };
 
 export default algos;
