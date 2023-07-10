@@ -102,7 +102,7 @@ type AlgoHandler = (
 
 const algos: Record<string, AlgoHandler> = {
   'yiddish-all': yiddishFeedAll,
-  'hebrew-all': hebrewFeedAll,
+  'hebrew-feed-all': hebrewFeedAll,
   'hebrew-feed': hebrewFeedOnlyPosts,
 };
 
