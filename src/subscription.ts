@@ -12,23 +12,17 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .map((del) => del.uri);
     const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
-      .flatMap(async (create) => {
+      .map(async (create) => {
         const language = await extractTextLanguage(create.record.text);
 
-        if (typeof language === 'undefined') {
-          return [];
-        }
-
-        return [
-          {
-            uri: create.uri,
-            cid: create.cid,
-            replyTo: create.record.reply?.parent.uri,
-            replyRoot: create.record.reply?.root.uri,
-            indexedAt: new Date().toISOString(),
-            language,
-          },
-        ];
+        return {
+          uri: create.uri,
+          cid: create.cid,
+          replyTo: create.record.reply?.parent.uri,
+          replyRoot: create.record.reply?.root.uri,
+          indexedAt: new Date().toISOString(),
+          language,
+        };
       })
       .toArray();
 

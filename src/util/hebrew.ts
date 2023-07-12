@@ -14,10 +14,11 @@ function hasHebrewLetters(text: string) {
 
 export const LANG_HEBREW = cld.LANGUAGES['HEBREW'];
 export const LANG_YIDDISH = cld.LANGUAGES['YIDDISH'];
+export const LANG_UNKNOWN = 'unknown';
 
 export async function extractTextLanguage(text: string) {
   if (!hasHebrewLetters(text)) {
-    return;
+    return LANG_UNKNOWN;
   }
 
   try {
@@ -32,4 +33,6 @@ export async function extractTextLanguage(text: string) {
   } catch (err) {
     logger.warn({ text }, 'Failed to identify language');
   }
+
+  return LANG_UNKNOWN;
 }
