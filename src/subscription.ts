@@ -2,7 +2,7 @@ import { AsyncIterable } from 'ix';
 import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
 import logger from './logger';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
-import { extractTextLanguage } from './util/hebrew';
+import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
@@ -12,6 +12,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .map((del) => del.uri);
     const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
+      .filter((op) => hasHebrewLetters(op.record.text))
       .map(async (create) => {
         const language = await extractTextLanguage(create.record.text);
 
