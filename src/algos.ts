@@ -16,14 +16,12 @@ function addCursor<T>(
     return builder;
   }
 
-  const [indexedAt, cid] = params.cursor.split('::');
-  if (!indexedAt || !cid) {
+  const indexedAt = params.cursor;
+  if (!indexedAt) {
     throw new InvalidRequestError('malformed cursor');
   }
   const timeStr = new Date(parseInt(indexedAt, 10)).toISOString();
-  return builder
-    .where('post.indexedAt', '<=', timeStr)
-    .where('post.cid', '<', cid);
+  return builder.where('post.indexedAt', '<=', timeStr);
 }
 
 function renderFeed(posts: PostSchema[]) {
@@ -34,7 +32,7 @@ function renderFeed(posts: PostSchema[]) {
   let cursor: string | undefined;
   const last = posts.at(-1);
   if (last) {
-    cursor = `${new Date(last.indexedAt).getTime()}::${last.cid}`;
+    cursor = new Date(last.indexedAt).getTime().toString();
   }
 
   return {
