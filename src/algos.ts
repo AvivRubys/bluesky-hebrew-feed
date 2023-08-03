@@ -110,7 +110,8 @@ async function firstHebrewPostsFeed(
             )
             .as('row_rank'),
         )
-        .where('replyTo', 'is', null),
+        .where('replyTo', 'is', null)
+        .where('language', '=', LANG_HEBREW),
     )
     .selectFrom('ranked_posts')
     .select(['uri', 'indexedAt'])
