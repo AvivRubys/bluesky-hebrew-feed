@@ -1,4 +1,4 @@
-import { Kysely, MigrationProvider } from 'kysely';
+import { Kysely, MigrationProvider, sql } from 'kysely';
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
@@ -6,6 +6,7 @@ export const migrationProvider: MigrationProvider = {
       '001': createTables,
       '002': addReplyColumns,
       '003': addLanguageColumn,
+      '004': addAuthorColumn,
     };
   },
 };
@@ -42,6 +43,24 @@ const addLanguageColumn = {
     await db.schema
       .alterTable('post')
       .addColumn('language', 'varchar', (col) => col.notNull().defaultTo('iw'))
+      .execute();
+  },
+};
+
+const addAuthorColumn = {
+  async up(db: Kysely<any>) {
+    await db.schema.alterTable('post').addColumn('author', 'varchar').execute();
+
+    await db
+      .updateTable('post')
+      .set({
+        author: sql<string>`SUBSTRING("uri", 'at://(.*)/app.bsky.feed.post/.*')`,
+      })
+      .execute();
+
+    await db.schema
+      .alterTable('post')
+      .alterColumn('author', (col) => col.setNotNull())
       .execute();
   },
 };

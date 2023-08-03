@@ -5,6 +5,7 @@ export type DatabaseSchema = {
 
 export type PostSchema = {
   uri: string;
+  author: string;
   cid: string;
   indexedAt: string;
   replyRoot?: string;
