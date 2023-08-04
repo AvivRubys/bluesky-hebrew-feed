@@ -5,7 +5,7 @@ import {
   OutputSchema as AlgoOutput,
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { AppContext } from './config';
-import { DatabaseSchema, PostSchema } from './db/schema';
+import { PostSchema } from './db/schema';
 import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
 
 function addCursor<T>(
@@ -47,7 +47,7 @@ async function hebrewFeedOnlyPosts(
 ): Promise<AlgoOutput> {
   let builder = ctx.db
     .selectFrom('post')
-    .selectAll()
+    .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
@@ -65,7 +65,7 @@ async function hebrewFeedAll(
 ): Promise<AlgoOutput> {
   let builder = ctx.db
     .selectFrom('post')
-    .selectAll()
+    .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -82,7 +82,7 @@ async function yiddishFeedAll(
 ): Promise<AlgoOutput> {
   let builder = ctx.db
     .selectFrom('post')
-    .selectAll()
+    .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_YIDDISH)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -98,24 +98,16 @@ async function firstHebrewPostsFeed(
   params: QueryParams,
 ): Promise<AlgoOutput> {
   let builder = ctx.db
-    .with('ranked_posts', (eb1) =>
-      eb1
+    .with('first_posts', (eb) =>
+      eb
         .selectFrom('post')
-        .selectAll()
-        .select((eb2) =>
-          eb2.fn
-            .agg('ROW_NUMBER')
-            .over((eb3) =>
-              eb3.partitionBy('author').orderBy('indexedAt', 'asc'),
-            )
-            .as('row_rank'),
-        )
-        .where('replyTo', 'is', null)
-        .where('language', '=', LANG_HEBREW),
+        .distinctOn('author')
+        .select(['uri', 'indexedAt'])
+        .orderBy('author')
+        .orderBy('indexedAt', 'asc'),
     )
-    .selectFrom('ranked_posts')
-    .select(['uri', 'indexedAt'])
-    .where('row_rank', '=', 1)
+    .selectFrom('first_posts')
+    .selectAll()
     .orderBy('indexedAt', 'desc')
     .limit(params.limit);
 
