@@ -14,7 +14,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
     const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
       .filter((op) => hasHebrewLetters(op.record.text))
-      .filter((op) => !isUserBlocked(op.author))
       .map(async (create) => {
         const language = await extractTextLanguage(create.record.text);
 
