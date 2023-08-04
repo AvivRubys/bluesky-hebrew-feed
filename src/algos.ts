@@ -7,7 +7,7 @@ import {
 import { AppContext } from './config';
 import { PostSchema } from './db/schema';
 import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
-import { BLOCKLIST, NEWS_USERS } from './util/userlists';
+import { FILTERED_USERS, NEWS_USERS } from './util/userlists';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -50,7 +50,7 @@ async function hebrewFeedOnlyPosts(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
-    .where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', FILTERED_USERS)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -88,7 +88,7 @@ async function hebrewFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
-    .where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', FILTERED_USERS)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -106,7 +106,7 @@ async function yiddishFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_YIDDISH)
-    .where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', FILTERED_USERS)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -126,7 +126,7 @@ async function firstHebrewPostsFeed(
         .selectFrom('post')
         .distinctOn('author')
         .select(['uri', 'indexedAt'])
-        .where('author', 'not in', BLOCKLIST)
+        .where('author', 'not in', FILTERED_USERS)
         .orderBy('author')
         .orderBy('indexedAt', 'asc'),
     )
