@@ -7,7 +7,7 @@ import {
 import { AppContext } from './config';
 import { PostSchema } from './db/schema';
 import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
-import { BLOCKLIST } from './util/blocklist';
+import { BLOCKLIST, NEWS_USERS } from './util/userlists';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -51,6 +51,25 @@ async function hebrewFeedOnlyPosts(
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
     .where('author', 'not in', BLOCKLIST)
+    .where('post.replyTo', 'is', null)
+    .orderBy('indexedAt', 'desc')
+    .orderBy('cid', 'desc')
+    .limit(params.limit);
+
+  builder = addCursor(builder, params);
+
+  return renderFeed(await builder.execute());
+}
+
+async function hebrewNewsFeedOnlyPosts(
+  ctx: AppContext,
+  params: QueryParams,
+): Promise<AlgoOutput> {
+  let builder = ctx.db
+    .selectFrom('post')
+    .select(['indexedAt', 'uri'])
+    .where('language', '=', LANG_HEBREW)
+    .where('author', 'in', NEWS_USERS)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -131,6 +150,7 @@ const algos: Record<string, AlgoHandler> = {
   'hebrew-feed-all': hebrewFeedAll,
   'hebrew-feed': hebrewFeedOnlyPosts,
   'hebrew-noobs': firstHebrewPostsFeed,
+  'hebrew-news': hebrewNewsFeedOnlyPosts,
 };
 
 export default algos;
