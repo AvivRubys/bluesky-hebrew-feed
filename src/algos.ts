@@ -50,7 +50,7 @@ async function hebrewFeedOnlyPosts(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
-	.where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', BLOCKLIST)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -69,7 +69,7 @@ async function hebrewFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
-	.where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', BLOCKLIST)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -87,7 +87,7 @@ async function yiddishFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_YIDDISH)
-	.where('author', 'not in', BLOCKLIST)
+    .where('author', 'not in', BLOCKLIST)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
