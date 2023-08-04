@@ -7,6 +7,7 @@ import {
 import { AppContext } from './config';
 import { PostSchema } from './db/schema';
 import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
+import { FILTERED_USERS, NEWS_USERS } from './util/userlists';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -49,6 +50,26 @@ async function hebrewFeedOnlyPosts(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
+    .where('author', 'not in', FILTERED_USERS)
+    .where('post.replyTo', 'is', null)
+    .orderBy('indexedAt', 'desc')
+    .orderBy('cid', 'desc')
+    .limit(params.limit);
+
+  builder = addCursor(builder, params);
+
+  return renderFeed(await builder.execute());
+}
+
+async function hebrewNewsFeedOnlyPosts(
+  ctx: AppContext,
+  params: QueryParams,
+): Promise<AlgoOutput> {
+  let builder = ctx.db
+    .selectFrom('post')
+    .select(['indexedAt', 'uri'])
+    .where('language', '=', LANG_HEBREW)
+    .where('author', 'in', NEWS_USERS)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
@@ -67,6 +88,7 @@ async function hebrewFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_HEBREW)
+    .where('author', 'not in', FILTERED_USERS)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -84,6 +106,7 @@ async function yiddishFeedAll(
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
     .where('language', '=', LANG_YIDDISH)
+    .where('author', 'not in', FILTERED_USERS)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
     .limit(params.limit);
@@ -103,6 +126,7 @@ async function firstHebrewPostsFeed(
         .selectFrom('post')
         .distinctOn('author')
         .select(['uri', 'indexedAt'])
+        .where('author', 'not in', FILTERED_USERS)
         .orderBy('author')
         .orderBy('indexedAt', 'asc'),
     )
@@ -126,6 +150,7 @@ const algos: Record<string, AlgoHandler> = {
   'hebrew-feed-all': hebrewFeedAll,
   'hebrew-feed': hebrewFeedOnlyPosts,
   'hebrew-noobs': firstHebrewPostsFeed,
+  'hebrew-news': hebrewNewsFeedOnlyPosts,
 };
 
 export default algos;
