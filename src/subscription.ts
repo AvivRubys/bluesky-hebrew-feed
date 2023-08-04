@@ -3,6 +3,7 @@ import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
 import logger from './logger';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
 import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
+import { isUserBlocked } from './util/blocklist';
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
@@ -13,6 +14,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
     const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
       .filter((op) => hasHebrewLetters(op.record.text))
+      .filter((op) => !isUserBlocked(op.author))
       .map(async (create) => {
         const language = await extractTextLanguage(create.record.text);
 
