@@ -21,7 +21,7 @@ export async function extractTextLanguage(text: string) {
     const detected = await cld.detect(text);
     const language = detected.languages[0].code;
 
-    logger.info({ text, language }, 'Language detected');
+    // logger.info({ text, language }, 'Language detected');
 
     return language;
   } catch (err) {
