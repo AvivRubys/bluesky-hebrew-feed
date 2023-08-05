@@ -6,7 +6,7 @@ import {
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { AppContext } from './config';
 import { PostSchema } from './db/schema';
-import { LANG_HEBREW, LANG_YIDDISH } from './util/hebrew';
+import { LANGS_HEBREW, LANG_YIDDISH } from './util/hebrew';
 import { FILTERED_USERS, NEWS_USERS } from './util/userlists';
 
 function addCursor<T>(
@@ -49,7 +49,7 @@ async function hebrewFeedOnlyPosts(
   let builder = ctx.db
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
-    .where('language', '=', LANG_HEBREW)
+    .where('language', 'in', LANGS_HEBREW)
     .where('author', 'not in', FILTERED_USERS)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
@@ -68,7 +68,7 @@ async function hebrewNewsFeedOnlyPosts(
   let builder = ctx.db
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
-    .where('language', '=', LANG_HEBREW)
+    .where('language', 'in', LANGS_HEBREW)
     .where('author', 'in', NEWS_USERS)
     .where('post.replyTo', 'is', null)
     .orderBy('indexedAt', 'desc')
@@ -87,7 +87,7 @@ async function hebrewFeedAll(
   let builder = ctx.db
     .selectFrom('post')
     .select(['indexedAt', 'uri'])
-    .where('language', '=', LANG_HEBREW)
+    .where('language', 'in', LANGS_HEBREW)
     .where('author', 'not in', FILTERED_USERS)
     .orderBy('indexedAt', 'desc')
     .orderBy('cid', 'desc')
