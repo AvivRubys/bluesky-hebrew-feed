@@ -127,6 +127,7 @@ async function firstHebrewPostsFeed(
         .distinctOn('author')
         .select(['uri', 'indexedAt'])
         .where('language', 'in', LANGS_HEBREW)
+        .where('post.replyTo', 'is', null)
         .where('author', 'not in', FILTERED_USERS)
         .orderBy('author')
         .orderBy('indexedAt', 'asc'),
