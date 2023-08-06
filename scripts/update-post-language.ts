@@ -21,12 +21,16 @@ import logger from '../src/logger';
     const [, repo, rkey] = Array.from(
       post.uri.matchAll(/at:\/\/(.*)\/app.bsky.feed.post\/(.*)/g),
     )[0];
-    const resp = await api.getPost({ repo, rkey });
-    const language = await extractTextLanguage(resp.value.text);
-    await db
-      .updateTable('post')
-      .set({ language })
-      .where('uri', '=', post.uri)
-      .execute();
+    try {
+      const resp = await api.getPost({ repo, rkey });
+      const language = await extractTextLanguage(resp.value.text);
+      await db
+        .updateTable('post')
+        .set({ language })
+        .where('uri', '=', post.uri)
+        .execute();
+    } catch (err) {
+      console.error(post.uri, err);
+    }
   }
 })();
