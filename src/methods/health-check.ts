@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { sql } from 'kysely';
-import { differenceInSeconds, formatDistanceToNowStrict } from 'date-fns';
+import { differenceInSeconds, formatDistanceToNow } from 'date-fns';
 import { Database } from '../db';
 import logger from '../logger';
 import { FirehoseSubscription } from '../subscription';
@@ -37,14 +37,12 @@ async function firehoseCheck(firehose: FirehoseSubscription) {
     );
   }
 
-  if (differenceInSeconds(firehose.lastEventDate, new Date()) > 10) {
+  if (differenceInSeconds(new Date(), firehose.lastEventDate) > 10) {
+    const diff = formatDistanceToNow(firehose.lastEventDate, {
+      addSuffix: true,
+    });
     throw new Error(
-      'Firehose health check failed. Last event date is older than 10s (' +
-        formatDistanceToNowStrict(firehose.lastEventDate, {
-          addSuffix: true,
-          unit: 'second',
-        }) +
-        ')',
+      `Firehose health check failed. Last event date is older than 10s (${diff})`,
     );
   }
 }
