@@ -84,12 +84,15 @@ export abstract class FirehoseSubscriptionBase {
   }
 
   async updateCursor(cursor: number) {
-    const statement = sql`INSERT INTO sub_state (service, cursor)
-VALUES (${this.service}, ${cursor})
-ON CONFLICT (service)
-DO UPDATE SET cursor = EXCLUDED.cursor;`;
-
-    await statement.execute(this.db);
+    await this.db
+      .insertInto('sub_state')
+      .values({ service: this.service, cursor })
+      .onConflict((oc) =>
+        oc
+          .column('service')
+          .doUpdateSet({ cursor: (eb) => eb.ref('excluded.cursor') }),
+      )
+      .execute();
   }
 
   async getCursor(): Promise<{ cursor?: number }> {
