@@ -8,6 +8,7 @@ export const migrationProvider: MigrationProvider = {
       '003': addLanguageColumn,
       '004': addAuthorColumn,
       '005': addIndexOnIndexedAtAndLanguage,
+      '006': addIndexOnAuthor,
     };
   },
 };
@@ -72,6 +73,16 @@ const addIndexOnIndexedAtAndLanguage = {
       .createIndex('post_indexedat_language_author_index')
       .on('post')
       .columns(['indexedAt', 'language'])
+      .execute();
+  },
+};
+
+const addIndexOnAuthor = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createIndex('post_author_index')
+      .on('post')
+      .column('author')
       .execute();
   },
 };
