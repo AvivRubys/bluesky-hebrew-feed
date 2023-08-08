@@ -61,29 +61,20 @@ function createLanguageFeed(
         const blocklist = await ctx.block.getBlocksFor(actor);
 
         if (blocklist && blocklist.length > 0) {
-          builder = builder.where('replyTo', 'not in', (eb) =>
-            eb
-              .selectFrom('post')
-              .select('uri')
-              .where('author', 'in', blocklist),
+          builder = builder.where((eb) =>
+            eb.or([
+              eb('replyTo', 'is', null),
+              eb('replyTo', 'not in', (eb) =>
+                eb
+                  .selectFrom('post')
+                  .select('uri')
+                  .where('author', 'in', blocklist),
+              ),
+            ]),
           );
         }
       }
     } else {
-      builder = builder.where('post.replyTo', 'is', null);
-    }
-
-    if (includeReplies && actor) {
-      const blocklist = await ctx.block.getBlocksFor(actor);
-
-      if (blocklist && blocklist.length > 0) {
-        builder = builder.where('replyTo', 'not in', (eb) =>
-          eb.selectFrom('post').select('uri').where('author', 'in', blocklist),
-        );
-      }
-    }
-
-    if (!includeReplies) {
       builder = builder.where('post.replyTo', 'is', null);
     }
 
