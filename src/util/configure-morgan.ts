@@ -1,8 +1,9 @@
 import morgan from 'morgan';
-import jws from 'jws';
+import { getRequestingActor } from './auth';
+import { Request } from 'express';
 
 morgan
-  .token('bsky-user', (req) => parseBearer(req.headers.authorization))
+  .token<Request>('bsky-user', (req) => getRequestingActor(req) ?? undefined)
   .token('decoded-url', (req) =>
     decodeURIComponent((req as any).originalUrl || req.url),
   )
@@ -10,12 +11,3 @@ morgan
     'bsky-feed-generator',
     ':date[iso] :bsky-user ":method :decoded-url" :status',
   );
-
-function parseBearer(authorizationHeader?: string) {
-  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authorizationHeader.substring('Bearer '.length).trim();
-  return jws.decode(token)?.payload?.iss;
-}

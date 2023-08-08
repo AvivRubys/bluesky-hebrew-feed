@@ -6,8 +6,8 @@ import {
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { AppContext } from './config';
 import { PostSchema } from './db/schema';
-import { LANGS_HEBREW, LANG_YIDDISH } from './util/hebrew';
-import { FILTERED_USERS, NEWS_USERS } from './util/userlists';
+import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
+import { FILTERED_USERS } from './util/userlists';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -42,78 +42,55 @@ function renderFeed(posts: Pick<PostSchema, 'indexedAt' | 'uri'>[]) {
   };
 }
 
-async function hebrewFeedOnlyPosts(
-  ctx: AppContext,
-  params: QueryParams,
-): Promise<AlgoOutput> {
-  let builder = ctx.db
-    .selectFrom('post')
-    .select(['indexedAt', 'uri'])
-    .where('language', 'in', LANGS_HEBREW)
-    .where('author', 'not in', FILTERED_USERS)
-    .where('post.replyTo', 'is', null)
-    .orderBy('indexedAt', 'desc')
-    .orderBy('cid', 'desc')
-    .limit(params.limit);
+function createLanguageFeed(
+  languages: string[],
+  includeReplies: boolean,
+): AlgoHandler {
+  return async (ctx: AppContext, params: QueryParams, actor?: string) => {
+    let builder = ctx.db
+      .selectFrom('post')
+      .select(['indexedAt', 'uri'])
+      .where('language', 'in', languages)
+      .where('author', 'not in', FILTERED_USERS)
+      .orderBy('indexedAt', 'desc')
+      .orderBy('cid', 'desc')
+      .limit(params.limit);
 
-  builder = addCursor(builder, params);
+    if (includeReplies) {
+      if (actor) {
+        const blocklist = await ctx.block.getBlocksFor(actor);
 
-  return renderFeed(await builder.execute());
-}
+        if (blocklist && blocklist.length > 0) {
+          builder = builder.where('replyTo', 'not in', (eb) =>
+            eb
+              .selectFrom('post')
+              .select('uri')
+              .where('author', 'in', blocklist),
+          );
+        }
+      }
+    } else {
+      builder = builder.where('post.replyTo', 'is', null);
+    }
 
-async function hebrewNewsFeedOnlyPosts(
-  ctx: AppContext,
-  params: QueryParams,
-): Promise<AlgoOutput> {
-  let builder = ctx.db
-    .selectFrom('post')
-    .select(['indexedAt', 'uri'])
-    .where('language', 'in', LANGS_HEBREW)
-    .where('author', 'in', NEWS_USERS)
-    .where('post.replyTo', 'is', null)
-    .orderBy('indexedAt', 'desc')
-    .orderBy('cid', 'desc')
-    .limit(params.limit);
+    if (includeReplies && actor) {
+      const blocklist = await ctx.block.getBlocksFor(actor);
 
-  builder = addCursor(builder, params);
+      if (blocklist && blocklist.length > 0) {
+        builder = builder.where('replyTo', 'not in', (eb) =>
+          eb.selectFrom('post').select('uri').where('author', 'in', blocklist),
+        );
+      }
+    }
 
-  return renderFeed(await builder.execute());
-}
+    if (!includeReplies) {
+      builder = builder.where('post.replyTo', 'is', null);
+    }
 
-async function hebrewFeedAll(
-  ctx: AppContext,
-  params: QueryParams,
-): Promise<AlgoOutput> {
-  let builder = ctx.db
-    .selectFrom('post')
-    .select(['indexedAt', 'uri'])
-    .where('language', 'in', LANGS_HEBREW)
-    .where('author', 'not in', FILTERED_USERS)
-    .orderBy('indexedAt', 'desc')
-    .orderBy('cid', 'desc')
-    .limit(params.limit);
+    builder = addCursor(builder, params);
 
-  builder = addCursor(builder, params);
-
-  return renderFeed(await builder.execute());
-}
-
-async function yiddishFeedAll(
-  ctx: AppContext,
-  params: QueryParams,
-): Promise<AlgoOutput> {
-  let builder = ctx.db
-    .selectFrom('post')
-    .select(['indexedAt', 'uri'])
-    .where('language', '=', LANG_YIDDISH)
-    .where('author', 'not in', FILTERED_USERS)
-    .orderBy('indexedAt', 'desc')
-    .orderBy('cid', 'desc')
-    .limit(params.limit);
-
-  builder = addCursor(builder, params);
-
-  return renderFeed(await builder.execute());
+    return renderFeed(await builder.execute());
+  };
 }
 
 async function firstHebrewPostsFeed(
@@ -145,14 +122,14 @@ async function firstHebrewPostsFeed(
 type AlgoHandler = (
   ctx: AppContext,
   params: QueryParams,
+  actor?: string,
 ) => Promise<AlgoOutput>;
 
 const algos: Record<string, AlgoHandler> = {
-  'yiddish-all': yiddishFeedAll,
-  'hebrew-feed-all': hebrewFeedAll,
-  'hebrew-feed': hebrewFeedOnlyPosts,
+  'yiddish-all': createLanguageFeed(LANGS_YIDDISH, true),
+  'hebrew-feed-all': createLanguageFeed(LANGS_HEBREW, true),
+  'hebrew-feed': createLanguageFeed(LANGS_HEBREW, false),
   'hebrew-noobs': firstHebrewPostsFeed,
-  'hebrew-news': hebrewNewsFeedOnlyPosts,
 };
 
 export default algos;

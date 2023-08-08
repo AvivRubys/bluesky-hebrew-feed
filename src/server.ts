@@ -6,6 +6,7 @@ import { createServer } from './lexicon';
 import feedGeneration from './methods/feed-generation';
 import describeGenerator from './methods/describe-generator';
 import { createDb, Database, migrateToLatest } from './db';
+import { BlockService } from './blocks';
 import { FirehoseSubscription } from './subscription';
 import { AppContext, Config } from './config';
 import wellKnown from './well-known';
@@ -44,10 +45,13 @@ export class FeedGenerator {
         blobLimit: 5 * 1024 * 1024, // 5mb
       },
     });
+
     const ctx: AppContext = {
       db,
       cfg,
+      block: new BlockService(),
     };
+
     feedGeneration(server, ctx);
     describeGenerator(server, ctx);
     app.use(server.xrpc.router);

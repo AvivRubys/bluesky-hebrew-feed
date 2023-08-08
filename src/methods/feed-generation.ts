@@ -3,8 +3,12 @@ import { AtUri } from '@atproto/uri';
 import { Server } from '../lexicon';
 import { AppContext } from '../config';
 import algos from '../algos';
+import logger from '../logger';
+import { getRequestingActor } from '../util/auth';
 
 export default function (server: Server, ctx: AppContext) {
+  const serviceDid = `did:web:${ctx.cfg.FEEDGEN_HOSTNAME}`;
+
   server.app.bsky.feed.getFeedSkeleton(async ({ params, req }) => {
     const feedUri = new AtUri(params.feed);
     const algo = algos[feedUri.rkey];
@@ -19,10 +23,17 @@ export default function (server: Server, ctx: AppContext) {
       );
     }
 
-    const body = await algo(ctx, params);
-    return {
-      encoding: 'application/json',
-      body: body,
-    };
+    try {
+      const actor = getRequestingActor(req);
+      const body = await algo(ctx, params, actor ?? undefined);
+
+      return {
+        encoding: 'application/json',
+        body: body,
+      };
+    } catch (err) {
+      logger.error({ err, feedUri }, 'Error while generating feed');
+      throw err;
+    }
   });
 }

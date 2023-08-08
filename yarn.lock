@@ -1115,7 +1115,7 @@ kysely@^0.26.1:
   resolved "https://registry.yarnpkg.com/kysely/-/kysely-0.26.1.tgz#2d2fb9316d53f3062596102c98d0d476e4e097b5"
   integrity sha512-FVRomkdZofBu3O8SiwAOXrwbhPZZr8mBN5ZeUWyprH29jzvy6Inzqbd0IMmGxpd4rcOCL9HyyBNWBa8FBqDAdg==
 
-"lru-cache@^9.1.1 || ^10.0.0":
+lru-cache@^10.0.0, "lru-cache@^9.1.1 || ^10.0.0":
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.0.0.tgz#b9e2a6a72a129d81ab317202d93c7691df727e61"
   integrity sha512-svTf/fzsKHffP42sujkO/Rjs37BCIsQVRCeNYIm9WN8rgT7ffoUnRtZCqU+6BqcSBdv8gwJeTz8knJpgACeQMw==
