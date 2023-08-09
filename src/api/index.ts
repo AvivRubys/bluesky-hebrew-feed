@@ -8,11 +8,13 @@ import wellKnown from './well-known';
 import { createServer } from '../lexicon';
 import './configure-morgan';
 import { AppContext } from '../context';
+import { collectDefaultMetrics } from 'prom-client';
 
 export function createApi(ctx: AppContext) {
   const app = express();
   app.use(morgan('bsky-feed-generator'));
   app.use(promBundle({ includePath: true }));
+  collectDefaultMetrics();
 
   const server = createServer({
     validateResponse: true,
