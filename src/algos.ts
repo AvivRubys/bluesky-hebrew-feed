@@ -4,10 +4,10 @@ import {
   QueryParams,
   OutputSchema as AlgoOutput,
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
-import { AppContext } from './config';
 import { PostSchema } from './db/schema';
 import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
 import { FILTERED_USERS } from './util/userlists';
+import { AppContext } from './context';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,

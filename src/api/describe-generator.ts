@@ -1,7 +1,7 @@
 import { Server } from '../lexicon';
-import { AppContext } from '../config';
 import algos from '../algos';
 import { AtUri } from '@atproto/uri';
+import { AppContext } from '../context';
 
 export default function (server: Server, ctx: AppContext) {
   const serviceDid = `did:web:${ctx.cfg.FEEDGEN_HOSTNAME}`;

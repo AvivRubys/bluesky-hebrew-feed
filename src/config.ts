@@ -1,12 +1,4 @@
 import { z } from 'zod';
-import { Database } from './db';
-import { BlockService } from './blocks';
-
-export type AppContext = {
-  db: Database;
-  cfg: Config;
-  block: BlockService;
-};
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),

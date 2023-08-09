@@ -1,8 +1,18 @@
 import { AsyncIterable } from 'ix';
 import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
-import logger from './logger';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
 import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
+import { Counter } from 'prom-client';
+
+const indexerPostsCreated = new Counter({
+  name: 'indexer_posts_created',
+  help: 'Posts indexed',
+});
+
+const indexerPostsDeleted = new Counter({
+  name: 'indexer_posts_deleted',
+  help: 'Posts deleted',
+});
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
@@ -29,6 +39,8 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .toArray();
 
     if (postsToDelete.length > 0) {
+      indexerPostsDeleted.inc(postsToDelete.length);
+
       await this.db
         .deleteFrom('post')
         .where('uri', 'in', postsToDelete)
@@ -36,7 +48,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
     }
 
     if (postsToCreate.length > 0) {
-      logger.info('Creating %d posts', postsToCreate.length);
+      indexerPostsCreated.inc(postsToCreate.length);
 
       await this.db
         .insertInto('post')

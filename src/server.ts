@@ -1,17 +1,11 @@
 import http from 'http';
 import events from 'events';
 import express from 'express';
-import morgan from 'morgan';
-import { createServer } from './lexicon';
-import feedGeneration from './methods/feed-generation';
-import describeGenerator from './methods/describe-generator';
 import { createDb, Database, migrateToLatest } from './db';
 import { BlockService } from './blocks';
 import { FirehoseSubscription } from './subscription';
-import { AppContext, Config } from './config';
-import wellKnown from './well-known';
-import './util/configure-morgan';
-import { createHealthCheckRoute as healthCheckRoute } from './methods/health-check';
+import { Config } from './config';
+import { createApi } from './api';
 
 export class FeedGenerator {
   public server?: http.Server;
@@ -29,34 +23,20 @@ export class FeedGenerator {
   }
 
   static create(cfg: Config) {
-    const app = express();
-    app.use(morgan('bsky-feed-generator'));
     const db = createDb(cfg);
     const firehose = new FirehoseSubscription(
       db,
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
     );
 
-    const server = createServer({
-      validateResponse: true,
-      payload: {
-        jsonLimit: 100 * 1024, // 100kb
-        textLimit: 100 * 1024, // 100kb
-        blobLimit: 5 * 1024 * 1024, // 5mb
-      },
-    });
-
-    const ctx: AppContext = {
+    const ctx = {
       db,
       cfg,
       block: new BlockService(),
+      firehose,
     };
 
-    feedGeneration(server, ctx);
-    describeGenerator(server, ctx);
-    app.use(server.xrpc.router);
-    app.use(wellKnown(ctx));
-    app.get('/health', healthCheckRoute(db, firehose));
+    const app = createApi(ctx);
 
     return new FeedGenerator(app, db, firehose, cfg);
   }
