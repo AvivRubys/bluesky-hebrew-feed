@@ -3,7 +3,7 @@ import { getRequestingActor } from '../util/auth';
 import { Request } from 'express';
 
 morgan
-  .token<Request>('bsky-user', (req) => getRequestingActor(req) ?? undefined)
+  .token<Request>('bsky-user', (req) => getRequestingActor(req))
   .token('decoded-url', (req) =>
     decodeURIComponent((req as any).originalUrl || req.url),
   )

@@ -38,9 +38,9 @@ export default function (server: Server, ctx: AppContext) {
       ctx.cfg.FEEDGEN_PUBLISHER_DID,
       params,
     );
-    const actor = getRequestingActor(req) ?? 'unknown';
+    const actor = getRequestingActor(req);
     const endTimer = feedGenerationHistogram.startTimer({
-      actor,
+      actor: actor ?? 'unknown',
       feed: feedUri.rkey,
     });
     try {
