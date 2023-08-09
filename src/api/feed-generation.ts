@@ -11,6 +11,7 @@ import { AppContext } from '../context';
 const feedGenerationHistogram = new Histogram({
   name: 'feed_generation_duration',
   help: 'Feed generation duration',
+  labelNames: ['actor', 'status'],
 });
 
 function decipherAlgorithm(publisherDid: string, params: QueryParams) {
