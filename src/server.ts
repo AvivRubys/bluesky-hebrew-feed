@@ -31,7 +31,7 @@ export class FeedGenerator {
   static create(cfg: Config) {
     const app = express();
     app.use(morgan('bsky-feed-generator'));
-    const db = createDb(cfg.POSTGRES_CONNECTION_STRING);
+    const db = createDb(cfg);
     const firehose = new FirehoseSubscription(
       db,
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
