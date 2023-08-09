@@ -1,36 +1,64 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import { AtpAgent, BlobRef } from '@atproto/api';
 import fs from 'fs/promises';
 import { ids } from '../src/lexicon/lexicons';
+import path from 'path';
 
-const run = async () => {
-  dotenv.config();
+const suffix = '\nהפיד בקוד פתוח! מוזמנים לעקוב ולעזור.';
 
-  // YOUR bluesky handle
-  // Ex: user.bsky.social
-  const handle = '';
+const feeds = [
+  {
+    recordName: 'hebrew-noobs',
+    displayName: 'עברית חדשים',
+    description: 'כל הפוסטים הראשונים בעברית' + suffix,
+    avatar: path.join(__dirname, 'feed-avatars', 'ח.png'),
+  },
+  {
+    recordName: 'hebrew-feed',
+    displayName: 'עברית',
+    description: 'כל הפוסטים בעברית (ללא תגובות).' + suffix,
+    avatar: path.join(__dirname, 'feed-avatars', 'א.png'),
+  },
+  {
+    recordName: 'hebrew-feed-all',
+    displayName: 'עברית + תגובות',
+    description: 'כל הפוסטים והתגובות בעברית.' + suffix,
+    avatar: path.join(__dirname, 'feed-avatars', 'ת.png'),
+  },
+  {
+    recordName: 'yiddish-all',
+    displayName: 'יידיש',
+    description:
+      "All posts and replies in yiddish.\nThis feed is open source, you're welcome to help!",
+    avatar: path.join(__dirname, 'feed-avatars', 'ע.png'),
+  },
+];
 
-  // YOUR bluesky password, or preferably an App Password (found in your client settings)
-  // Ex: abcd-1234-efgh-5678
-  const password = '';
+const handle = 'avivr.dev';
+const password = '';
 
-  // A short name for the record that will show in urls
-  // Lowercase with no spaces.
-  // Ex: whats-hot
-  const recordName = '';
+(async () => {
+  for (const feed of feeds) {
+    console.log('Running', feed.recordName);
 
-  // A display name for your feed
-  // Ex: What's Hot
-  const displayName = '';
+    await createFeed(
+      feed.recordName,
+      feed.displayName,
+      feed.description,
+      feed.avatar,
+    );
 
-  // (Optional) A description of your feed
-  // Ex: Top trending content from the whole network
-  const description = '';
+    console.log('All done 🎉');
+    console.log();
+  }
+})();
 
-  // (Optional) The path to an image to be used as your feed's avatar
-  // Ex: ~/path/to/avatar.jpeg
-  const avatar: string = '';
-
+async function createFeed(
+  recordName: string,
+  displayName: string,
+  description: string,
+  avatar: string,
+) {
   // -------------------------------------
   // NO NEED TO TOUCH ANYTHING BELOW HERE
   // -------------------------------------
@@ -68,10 +96,15 @@ const run = async () => {
     const blobRes = await agent.api.com.atproto.repo.uploadBlob(img, {
       encoding,
     });
+    if (!blobRes.success) {
+      throw new Error(
+        'Failed uploading blob' + JSON.stringify(blobRes, null, 4),
+      );
+    }
     avatarRef = blobRes.data.blob;
   }
 
-  await agent.api.com.atproto.repo.putRecord({
+  const putResp = await agent.api.com.atproto.repo.putRecord({
     repo: agent.session?.did ?? '',
     collection: ids.AppBskyFeedGenerator,
     rkey: recordName,
@@ -84,7 +117,9 @@ const run = async () => {
     },
   });
 
-  console.log('All done 🎉');
-};
-
-run();
+  if (!putResp.success) {
+    throw new Error(
+      'Failed setting feed record' + JSON.stringify(putResp, null, 4),
+    );
+  }
+}
