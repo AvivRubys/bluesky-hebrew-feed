@@ -11,7 +11,7 @@ import { AppContext } from '../context';
 const feedGenerationHistogram = new Histogram({
   name: 'feed_generation_duration',
   help: 'Feed generation duration',
-  labelNames: ['actor', 'status'],
+  labelNames: ['actor', 'status', 'feed'],
 });
 
 function decipherAlgorithm(publisherDid: string, params: QueryParams) {
@@ -38,8 +38,11 @@ export default function (server: Server, ctx: AppContext) {
       ctx.cfg.FEEDGEN_PUBLISHER_DID,
       params,
     );
-    const actor = getRequestingActor(req) ?? undefined;
-    const endTimer = feedGenerationHistogram.startTimer({ actor });
+    const actor = getRequestingActor(req) ?? 'unknown';
+    const endTimer = feedGenerationHistogram.startTimer({
+      actor,
+      feed: feedUri.rkey,
+    });
     try {
       const body = await feedGenerator(ctx, params, actor);
       endTimer({ status: 'success' });
