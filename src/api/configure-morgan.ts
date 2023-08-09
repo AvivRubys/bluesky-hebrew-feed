@@ -1,5 +1,5 @@
 import morgan from 'morgan';
-import { getRequestingActor } from './auth';
+import { getRequestingActor } from '../util/auth';
 import { Request } from 'express';
 
 morgan

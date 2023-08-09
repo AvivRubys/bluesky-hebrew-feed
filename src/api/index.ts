@@ -6,7 +6,7 @@ import describeGenerator from './describe-generator';
 import { createHealthCheckRoute as healthCheckRoute } from './health-check';
 import wellKnown from './well-known';
 import { createServer } from '../lexicon';
-import './util/configure-morgan';
+import './configure-morgan';
 import { AppContext } from '../context';
 
 export function createApi(ctx: AppContext) {
