@@ -36,7 +36,7 @@ export class BlockService {
     }
 
     const blocks = await this.getBlocksFromSource(actor);
-    block_fetch_cache.inc({ status: 'hit', list_size: blocks?.length });
+    block_fetch_cache.inc({ status: 'miss', list_size: blocks?.length });
     if (blocks === null) {
       return [];
     }
