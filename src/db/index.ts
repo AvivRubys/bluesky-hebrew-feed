@@ -1,10 +1,17 @@
 import fs from 'fs';
 import { Pool } from 'pg';
 import { Kysely, Migrator, PostgresDialect } from 'kysely';
+import { Histogram } from 'prom-client';
 import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
 import { Config } from '../config';
+import { createMonitoringPlugin } from '../util/monitoring';
 
+const database_operation_duration = new Histogram({
+  name: 'database_operation_duration',
+  help: 'Duration of all database operations',
+  labelNames: ['operation_type'],
+});
 export function createDb(cfg: Config): Database {
   return new Kysely<DatabaseSchema>({
     dialect: new PostgresDialect({
@@ -18,6 +25,7 @@ export function createDb(cfg: Config): Database {
           : true,
       }),
     }),
+    plugins: [createMonitoringPlugin(database_operation_duration)],
   });
 }
 
