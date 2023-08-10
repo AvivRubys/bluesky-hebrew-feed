@@ -8,7 +8,7 @@ import { measure } from './util/monitoring';
 const block_fetch_cache = new Counter({
   name: 'block_fetch_cache',
   help: 'Hits/misses of blocklist fetching',
-  labelNames: ['status'],
+  labelNames: ['status', 'list_size'],
 });
 
 const block_fetch_duration = new Histogram({
@@ -29,12 +29,14 @@ export class BlockService {
 
   async getBlocksFor(actor: string) {
     if (this.#cache.has(actor)) {
-      block_fetch_cache.inc({ status: 'miss' });
-      return this.#cache.get(actor);
+      const blocks = this.#cache.get(actor);
+      block_fetch_cache.inc({ status: 'hit', list_size: blocks?.length });
+
+      return blocks;
     }
 
     const blocks = await this.getBlocksFromSource(actor);
-    block_fetch_cache.inc({ status: 'hit' });
+    block_fetch_cache.inc({ status: 'hit', list_size: blocks?.length });
     if (blocks === null) {
       return [];
     }
