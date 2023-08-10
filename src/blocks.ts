@@ -1,18 +1,16 @@
 import { BskyAgent } from '@atproto/api';
 import { LRUCache } from 'lru-cache';
-import { minutesToMilliseconds } from 'date-fns';
 import logger from './logger';
+import { Config } from './config';
 
 export class BlockService {
   #cache: LRUCache<string, string[]>;
-  #bsky: BskyAgent;
 
-  constructor() {
+  constructor(private bsky: BskyAgent, config: Config) {
     this.#cache = new LRUCache<string, string[]>({
       max: 1000,
-      ttl: minutesToMilliseconds(10),
+      ttl: config.CACHE_TTL_MS,
     });
-    this.#bsky = new BskyAgent({ service: 'https://bsky.social' });
   }
 
   async getBlocksFor(actor: string) {
@@ -36,7 +34,7 @@ export class BlockService {
       let cursor: string | undefined = undefined;
       let lastBatchSize: number | undefined = undefined;
       do {
-        const blockPage = await this.#bsky.app.bsky.graph.block.list({
+        const blockPage = await this.bsky.app.bsky.graph.block.list({
           repo: actor,
           cursor,
         });

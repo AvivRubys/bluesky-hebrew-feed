@@ -5,6 +5,8 @@ const envSchema = z.object({
   HOST: z.string().default('localhost'),
   POSTGRES_CONNECTION_STRING: z.string(),
   POSTGRES_CA_CERT_FILEPATH: z.string().optional(),
+  CACHE_TTL_MS: z.coerce.number(),
+  BLUESKY_API_ENDPOINT: z.string().default('https://bsky.social'),
   FEEDGEN_SUBSCRIPTION_ENDPOINT: z.string().default('wss://bsky.social'),
   FEEDGEN_HOSTNAME: z.string().default('example.com'),
   FEEDGEN_PUBLISHER_DID: z.string(),

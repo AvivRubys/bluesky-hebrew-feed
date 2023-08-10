@@ -1,3 +1,4 @@
+import { BskyAgent } from '@atproto/api';
 import { BlockService } from './blocks';
 import { Config } from './config';
 import { Database } from './db';
@@ -8,4 +9,5 @@ export type AppContext = {
   cfg: Config;
   block: BlockService;
   firehose: FirehoseSubscription;
+  bsky: BskyAgent;
 };
