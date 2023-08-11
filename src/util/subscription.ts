@@ -84,15 +84,25 @@ export abstract class FirehoseSubscriptionBase {
   }
 
   async updateCursor(cursor: number) {
-    await this.db
-      .insertInto('sub_state')
-      .values({ service: this.service, cursor })
-      .onConflict((oc) =>
-        oc
-          .column('service')
-          .doUpdateSet({ cursor: (eb) => eb.ref('excluded.cursor') }),
-      )
-      .execute();
+    const result = await this.db
+      .updateTable('sub_state')
+      .set({ cursor })
+      .where('service', '=', this.service)
+      .executeTakeFirst();
+
+    if (result.numUpdatedRows === 0n) {
+      logger.info('Updating sub_state changed no rows, upserting instead');
+
+      await this.db
+        .insertInto('sub_state')
+        .values({ service: this.service, cursor })
+        .onConflict((oc) =>
+          oc
+            .column('service')
+            .doUpdateSet({ cursor: (eb) => eb.ref('excluded.cursor') }),
+        )
+        .execute();
+    }
   }
 
   async getCursor(): Promise<{ cursor?: number }> {
