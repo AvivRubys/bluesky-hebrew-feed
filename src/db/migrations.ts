@@ -9,6 +9,7 @@ export const migrationProvider: MigrationProvider = {
       '004': addAuthorColumn,
       '005': addIndexOnIndexedAtAndLanguage,
       '006': addIndexOnAuthor,
+      '007': optimizeIndexes,
     };
   },
 };
@@ -79,10 +80,34 @@ const addIndexOnIndexedAtAndLanguage = {
 
 const addIndexOnAuthor = {
   async up(db: Kysely<unknown>) {
+    // To allow filtering by user, mainly for blocklist consideration feature
     await db.schema
       .createIndex('post_author_index')
       .on('post')
       .column('author')
       .execute();
+  },
+};
+
+const optimizeIndexes = {
+  async up(db: Kysely<unknown>) {
+    // Feeds are effectively partitioned by language and on being posts or replies
+    await db.schema
+      .createIndex('post_language_replyto_index')
+      .on('post')
+      .columns(['language', 'replyTo'])
+      .using('btree')
+      .execute();
+
+    // Cursors use indexedAt heavily, as well as ordering any feed query
+    await db.schema
+      .createIndex('post_indexedat_index')
+      .on('post')
+      .column('indexedAt')
+      .using('btree')
+      .execute();
+
+    // Should not be needed anymore
+    await db.schema.dropIndex('post_indexedat_language_author_index').execute();
   },
 };
