@@ -31,7 +31,7 @@ export class FeedGenerator {
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
     );
     const bsky = new BskyAgent({ service: cfg.BLUESKY_API_ENDPOINT });
-    const block = new BlockService(bsky, cfg);
+    const block = new BlockService(bsky, db, cfg);
 
     const ctx: AppContext = {
       db,

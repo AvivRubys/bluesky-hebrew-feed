@@ -1,6 +1,9 @@
+import { GeneratedAlways } from 'kysely';
+
 export type DatabaseSchema = {
   post: PostSchema;
   sub_state: SubStateSchema;
+  block_cache: BlockCacheSchema;
 };
 
 export type PostSchema = {
@@ -16,4 +19,10 @@ export type PostSchema = {
 export type SubStateSchema = {
   service: string;
   cursor: number;
+};
+
+export type BlockCacheSchema = {
+  did: string;
+  blockedDids: string[];
+  createdAt: GeneratedAlways<Date>;
 };

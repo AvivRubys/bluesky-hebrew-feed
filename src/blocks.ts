@@ -1,14 +1,15 @@
 import { Counter, Histogram } from 'prom-client';
 import { BskyAgent } from '@atproto/api';
-import { LRUCache } from 'lru-cache';
 import logger from './logger';
 import { Config } from './config';
 import { measure } from './util/monitoring';
+import { Database } from './db';
+import { addMilliseconds, isBefore } from 'date-fns';
 
 const block_fetch_cache = new Counter({
   name: 'block_fetch_cache',
   help: 'Hits/misses of blocklist fetching',
-  labelNames: ['status', 'list_size'],
+  labelNames: ['status'],
 });
 
 const block_fetch_duration = new Histogram({
@@ -18,32 +19,37 @@ const block_fetch_duration = new Histogram({
 });
 
 export class BlockService {
-  #cache: LRUCache<string, string[]>;
+  constructor(
+    private bsky: BskyAgent,
+    private db: Database,
+    private config: Config,
+  ) {}
 
-  constructor(private bsky: BskyAgent, config: Config) {
-    this.#cache = new LRUCache<string, string[]>({
-      max: 1000,
-      ttl: config.CACHE_TTL_MS,
-    });
+  private isValid(createdAt?: Date) {
+    return (
+      createdAt &&
+      isBefore(addMilliseconds(createdAt, this.config.CACHE_TTL_MS), Date.now())
+    );
   }
 
-  async getBlocksFor(actor: string) {
-    if (this.#cache.has(actor)) {
-      const blocks = this.#cache.get(actor);
-      block_fetch_cache.inc({ status: 'hit', list_size: blocks?.length });
+  async verifyForActor(actor: string) {
+    const result = await this.db
+      .selectFrom('block_cache')
+      .select('createdAt')
+      .where('did', '=', actor)
+      .executeTakeFirst();
 
-      return blocks;
+    if (this.isValid(result?.createdAt)) {
+      block_fetch_cache.inc({ status: 'hit' });
+      return;
     }
 
-    const blocks = await this.getBlocksFromSource(actor);
-    block_fetch_cache.inc({ status: 'miss', list_size: blocks?.length });
-    if (blocks === null) {
-      return [];
-    }
-
-    this.#cache.set(actor, blocks);
-
-    return blocks;
+    const blocks = (await this.getBlocksFromSource(actor)) ?? [];
+    block_fetch_cache.inc({ status: 'miss' });
+    await this.db
+      .insertInto('block_cache')
+      .values([{ did: actor, blockedDids: blocks }])
+      .execute();
   }
 
   private async getBlocksFromSource(actor: string) {
