@@ -1,4 +1,5 @@
 import path from 'path';
+import { Counter } from 'prom-client';
 import FastText from 'fasttext';
 import logger from '../../logger';
 
@@ -18,22 +19,30 @@ export const LANGS_YIDDISH = ['yi'];
 export const LANG_UNKNOWN = 'unknown';
 
 const classifier = new FastText.Classifier(path.join(__dirname, 'model.ftz'));
+const indexer_language_detections = new Counter({
+  name: 'indexer_language_detections',
+  help: 'Results of language detections',
+  labelNames: ['language', 'confidence'],
+});
 export async function extractTextLanguage(text: string) {
+  let language = LANG_UNKNOWN;
+  let confidence: number | undefined;
+
   try {
     const detected = await classifier.predict(text, 1);
 
-    if (detected.length == 0) {
-      logger.warn({ text }, 'Failed to identify language');
-      return LANG_UNKNOWN;
+    if (detected.length > 0) {
+      language = detected[0].label.replace('__label__', '');
+      confidence = detected[0].value;
     }
-
-    const language = detected[0].label.replace('__label__', '');
-    logger.info({ text, language }, 'Language detected');
-
-    return language;
   } catch (err) {
     logger.error({ err, text }, 'Failed to identify language');
   }
 
-  return LANG_UNKNOWN;
+  indexer_language_detections.inc({
+    language,
+    confidence,
+  });
+
+  return language;
 }

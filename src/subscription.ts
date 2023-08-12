@@ -1,8 +1,10 @@
 import { AsyncIterable } from 'ix';
+import { RichText } from '@atproto/api';
+import { Counter } from 'prom-client';
 import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
 import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
-import { Counter } from 'prom-client';
+import { Record as PostRecord } from './lexicon/types/app/bsky/feed/post';
 
 const indexerPostsCreated = new Counter({
   name: 'indexer_posts_created',
@@ -24,7 +26,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .flatMap((op) => op.posts.creates)
       .filter((op) => hasHebrewLetters(op.record.text))
       .map(async (create) => {
-        const language = await extractTextLanguage(create.record.text);
+        const language = await extractTextLanguage(removeFacets(create.record));
 
         return {
           uri: create.uri,
@@ -57,4 +59,18 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         .execute();
     }
   }
+}
+
+function removeFacets(record: PostRecord) {
+  const richText = new RichText({
+    text: record.text,
+    facets: record.facets,
+    entities: record.entities,
+  });
+
+  for (const facet of richText.facets ?? []) {
+    richText.delete(facet.index.byteStart, facet.index.byteEnd);
+  }
+
+  return richText.text.trim();
 }
