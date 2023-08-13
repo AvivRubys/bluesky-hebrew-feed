@@ -4,6 +4,8 @@ import { LRUCache } from 'lru-cache';
 import logger from './logger';
 import { Config } from './config';
 import { measure } from './util/monitoring';
+import { AsyncIterable } from 'ix';
+import { from } from 'ix/asynciterable';
 
 const block_fetch_cache = new Counter({
   name: 'block_fetch_cache',
@@ -35,7 +37,9 @@ export class BlockService {
       return blocks;
     }
 
-    const blocks = await this.getBlocksFromSource(actor);
+    const blocks = await from(this.getBlocksFromSource(actor))
+      .take(100)
+      .toArray();
     block_fetch_cache.inc({ status: 'miss', list_size: blocks?.length });
     if (blocks === null) {
       return [];
@@ -46,9 +50,8 @@ export class BlockService {
     return blocks;
   }
 
-  private async getBlocksFromSource(actor: string) {
+  private async *getBlocksFromSource(actor: string) {
     try {
-      const blocks: string[] = [];
       let cursor: string | undefined = undefined;
       let lastBatchSize: number | undefined = undefined;
       do {
@@ -58,16 +61,13 @@ export class BlockService {
             cursor,
           }),
         );
-        blocks.push(...blockPage.records.map((r) => r.value.subject));
+        yield* blockPage.records.map((r) => r.value.subject);
 
         cursor = blockPage.cursor;
         lastBatchSize = blockPage.records.length;
       } while (cursor != undefined && lastBatchSize === 50);
-
-      return blocks;
     } catch (err) {
       logger.error(err, 'Error while fetching blocks');
-      return null;
     }
   }
 }
