@@ -10,6 +10,7 @@ export const migrationProvider: MigrationProvider = {
       '005': addIndexOnIndexedAtAndLanguage,
       '006': addIndexOnAuthor,
       '007': optimizeIndexes,
+      '008': removeLanguageDefault,
     };
   },
 };
@@ -109,5 +110,14 @@ const optimizeIndexes = {
 
     // Should not be needed anymore
     await db.schema.dropIndex('post_indexedat_language_author_index').execute();
+  },
+};
+
+const removeLanguageDefault = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .alterTable('post')
+      .alterColumn('language', (c) => c.dropDefault())
+      .execute();
   },
 };
