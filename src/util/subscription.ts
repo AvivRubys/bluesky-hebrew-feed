@@ -1,5 +1,5 @@
-import { formatDistanceToNowStrict } from 'date-fns';
-import { sql } from 'kysely';
+import { differenceInMilliseconds } from 'date-fns';
+import { Counter, Gauge } from 'prom-client';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
 import { filter } from 'ix/asynciterable/operators';
@@ -16,6 +16,16 @@ import {
 import { Database } from '../db';
 import logger from '../logger';
 import { bufferTime } from './buffer-time';
+
+const commits_handled = new Counter({
+  name: 'indexer_commits_handled',
+  help: 'Number of commits received and handled',
+});
+
+const commit_lag = new Gauge({
+  name: 'indexer_commit_lag',
+  help: 'Indexer firehose handling lag',
+});
 
 export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
@@ -59,16 +69,9 @@ export abstract class FirehoseSubscriptionBase {
       }
 
       const lastEvent = commits.at(-1)!;
-      const lastEventDate = new Date(lastEvent.time);
-      this.lastEventDate = lastEventDate;
-      logger.info(
-        'Handled %d commits from %s',
-        commits.length,
-        formatDistanceToNowStrict(lastEventDate, {
-          addSuffix: true,
-          unit: 'minute',
-        }),
-      );
+      this.lastEventDate = new Date(lastEvent.time);
+      commits_handled.inc(commits.length);
+      commit_lag.set(differenceInMilliseconds(new Date(), this.lastEventDate));
       await this.updateCursor(lastEvent.seq);
     }
   }
