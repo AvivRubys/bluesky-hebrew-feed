@@ -5,7 +5,7 @@ import {
   OutputSchema as AlgoOutput,
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { PostSchema } from './db/schema';
-import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
+import { HEBREW_LOOKALIKES, LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
 import { FILTERED_USERS } from './util/userlists';
 import { AppContext } from './context';
 
@@ -49,12 +49,25 @@ function createLanguageFeed(
   return async (ctx: AppContext, params: QueryParams, actor?: string) => {
     let builder = ctx.db
       .selectFrom('post')
-      .select(['indexedAt', 'uri'])
-      .where('language', 'in', languages)
-      .where('author', 'not in', FILTERED_USERS)
-      .orderBy('indexedAt', 'desc')
-      .orderBy('cid', 'desc')
-      .limit(params.limit);
+      .select(['post.indexedAt', 'post.uri'])
+      .where('post.author', 'not in', FILTERED_USERS)
+      .orderBy('post.indexedAt', 'desc')
+      .orderBy('post.cid', 'desc')
+      .limit(params.limit)
+
+      // Solve the "author who always posts in a specific language whose posts still get misidentified" problem
+      .innerJoin('author_language', (eb) =>
+        eb.onRef('post.author', '==', 'author_language.author'),
+      )
+      .where((eb) =>
+        eb.or([
+          eb('post.language', 'in', languages),
+          eb.and([
+            eb('post.language', 'in', HEBREW_LOOKALIKES),
+            eb('author_language.language', 'in', languages),
+          ]),
+        ]),
+      );
 
     if (includeReplies) {
       if (actor) {
@@ -63,8 +76,8 @@ function createLanguageFeed(
         if (blocklist && blocklist.length > 0) {
           builder = builder.where((eb) =>
             eb.or([
-              eb('replyTo', 'is', null),
-              eb('replyTo', 'not in', (eb) =>
+              eb('post.replyTo', 'is', null),
+              eb('post.replyTo', 'not in', (eb) =>
                 eb
                   .selectFrom('post')
                   .select('uri')
