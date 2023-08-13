@@ -1,5 +1,5 @@
+import events from 'events';
 import { formatDistanceToNowStrict } from 'date-fns';
-import { sql } from 'kysely';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
 import { filter } from 'ix/asynciterable/operators';
@@ -13,17 +13,17 @@ import {
   OutputSchema as RepoEvent,
   isCommit,
 } from '../lexicon/types/com/atproto/sync/subscribeRepos';
-import { Database } from '../db';
 import logger from '../logger';
 import { bufferTime } from './buffer-time';
+import { AppContext } from '../context';
 
 export abstract class FirehoseSubscriptionBase {
-  public sub: Subscription<RepoEvent>;
   public lastEventDate?: Date;
+  private sub: Subscription<RepoEvent>;
 
-  constructor(public db: Database, public service: string) {
+  constructor(protected ctx: AppContext) {
     this.sub = new Subscription({
-      service: service,
+      service: ctx.cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
       method: ids.ComAtprotoSyncSubscribeRepos,
       getParams: () => this.getCursor(),
       validate: (value: unknown) => {

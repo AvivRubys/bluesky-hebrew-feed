@@ -1,23 +1,25 @@
-import { Request, Response } from 'express';
+import express from 'express';
 import { sql } from 'kysely';
 import { differenceInSeconds, formatDistanceToNow } from 'date-fns';
 import { Database } from '../db';
 import logger from '../logger';
 import { FirehoseSubscription } from '../subscription';
+import { AppContext } from '../context';
 
-export function createHealthCheckRoute(
-  db: Database,
-  firehose: FirehoseSubscription,
-) {
-  return async (_: Request, res: Response) => {
+export function healthCheckRoute(ctx: AppContext) {
+  const router = express.Router();
+
+  router.get('/.well-known/did.json', async (_, res) => {
     try {
-      await Promise.all([databaseCheck(db), firehoseCheck(firehose)]);
+      await Promise.all([databaseCheck(ctx.db), firehoseCheck(ctx.firehose)]);
       res.status(200).send();
     } catch (err) {
       logger.warn(err, 'Health check failed');
       res.status(503).send();
     }
-  };
+  });
+
+  return router;
 }
 
 async function databaseCheck(db: Database) {

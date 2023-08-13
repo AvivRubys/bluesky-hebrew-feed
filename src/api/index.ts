@@ -1,14 +1,14 @@
 import express from 'express';
 import promBundle from 'express-prom-bundle';
+import { collectDefaultMetrics } from 'prom-client';
 import morgan from 'morgan';
 import feedGeneration from './feed-generation';
 import describeGenerator from './describe-generator';
-import { createHealthCheckRoute as healthCheckRoute } from './health-check';
+import { healthCheckRoute } from './health-check';
 import wellKnown from './well-known';
 import { createServer } from '../lexicon';
 import './configure-morgan';
 import { AppContext } from '../context';
-import { collectDefaultMetrics } from 'prom-client';
 
 export function createApi(ctx: AppContext) {
   const app = express();
@@ -28,7 +28,7 @@ export function createApi(ctx: AppContext) {
   describeGenerator(server, ctx);
   app.use(server.xrpc.router);
   app.use(wellKnown(ctx));
-  app.get('/health', healthCheckRoute(ctx.db, ctx.firehose));
+  app.use(healthCheckRoute(ctx));
 
   return app;
 }
