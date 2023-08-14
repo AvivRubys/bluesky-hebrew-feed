@@ -118,6 +118,11 @@ export abstract class FirehoseSubscriptionBase {
   }
 }
 
+const firehose_operations = new Counter({
+  name: 'firehose_operations',
+  help: 'All operations seen on the firehose',
+  labelNames: ['action', 'collection'],
+});
 export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
   const car = await readCar(evt.blocks);
   const opsByType: OperationsByType = {
@@ -127,6 +132,7 @@ export const getOpsByType = async (evt: Commit): Promise<OperationsByType> => {
   for (const op of evt.ops) {
     const uri = `at://${evt.repo}/${op.path}`;
     const [collection] = op.path.split('/');
+    firehose_operations.inc({ action: op.action, collection });
 
     if (op.action === 'update') continue; // updates not supported yet
 
