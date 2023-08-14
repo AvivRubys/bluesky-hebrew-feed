@@ -1,5 +1,5 @@
 import path from 'path';
-import { Counter } from 'prom-client';
+import { Histogram } from 'prom-client';
 import FastText from 'fasttext';
 import logger from '../../logger';
 
@@ -19,10 +19,11 @@ export const LANGS_YIDDISH = ['yi'];
 export const LANG_UNKNOWN = 'unknown';
 
 const classifier = new FastText.Classifier(path.join(__dirname, 'model.ftz'));
-const indexer_language_detections = new Counter({
+const indexer_language_detections = new Histogram({
   name: 'indexer_language_detections',
   help: 'Results of language detections',
-  labelNames: ['language', 'confidence'],
+  labelNames: ['language'],
+  buckets: [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2],
 });
 export async function extractTextLanguage(text: string) {
   let language = LANG_UNKNOWN;
@@ -39,10 +40,7 @@ export async function extractTextLanguage(text: string) {
     logger.error({ err, text }, 'Failed to identify language');
   }
 
-  indexer_language_detections.inc({
-    language,
-    confidence,
-  });
+  indexer_language_detections.observe({ language }, confidence ?? 0);
 
   return language;
 }
