@@ -10,7 +10,7 @@
     "publishFeed": "ts-node scripts/publishFeedGen.ts",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "build": "rimraf dist && tsc && cp src/util/hebrew/model.ftz dist/util/hebrew/model.ftz"
+    "build": "ts-node scripts/prepare-dist-folder.ts && tsc"
   },
   "dependencies": {
     "@atproto/api": "^0.3.13",

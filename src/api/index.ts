@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import promBundle from 'express-prom-bundle';
 import morgan from 'morgan';
@@ -29,6 +30,7 @@ export function createApi(ctx: AppContext) {
   app.use(server.xrpc.router);
   app.use(wellKnown(ctx));
   app.get('/health', healthCheckRoute(ctx.db, ctx.firehose));
+  app.use(express.static(path.join(__dirname, 'static')));
 
   return app;
 }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Feed visualizer</title>
+    <meta charset="utf-8" />
+    <style>
+      #posts {
+        font-family: Helvetica;
+        font-size: small;
+        margin-left: 2%;
+        margin-top: 1%;
+      }
+
+      #posts > article {
+        border-bottom: 2px solid black;
+        padding-bottom: 0.5em;
+        margin-bottom: 0.5em;
+      }
+    </style>
+    <script lang="text/javascript">
+      async function getDisplayName(did) {
+        const resolved = await fetch(`https://plc.directory/${did}`).then(r => r.json());
+        return resolved.alsoKnownAs[0];
+      }
+
+      const atUriRegex = new RegExp("at://(.+)/app.bsky.feed.post/(.+)", 'g');
+      async function getFeed(feedName) {
+        const feed = await fetch(`xrpc/app.bsky.feed.getFeedSkeleton?limit=10&feed=at://did:plc:63fijvrra4pxxj34obunxp6f/app.bsky.feed.generator/${feedName}`).then(r => r.json());
+        const posts = await Promise.all(feed.feed.map(async e => {
+          const [,repo, rkey] = Array.from(e.post.matchAll(atUriRegex))[0];
+          const fetchUrl = new URL("https://bsky.social/xrpc/com.atproto.repo.getRecord?collection=app.bsky.feed.post");
+          fetchUrl.searchParams.set('repo', repo);
+          fetchUrl.searchParams.set('rkey', rkey);
+
+          const [post, handle] = await Promise.all([
+            fetch(fetchUrl).then(r => r.json()),
+            getDisplayName(repo)
+          ])
+          return {author: handle.replace('at://', ''), text: post.value.text};
+        }));
+        return posts;
+      }
+
+      function createPost(handle, postText) {
+        const template = document.createElement('template');
+        template.innerHTML = `
+          <article>
+            <b>${handle}</b><br/>
+            ${postText}
+          </article>`.trim();
+        return template.content.firstChild;
+      }
+
+      async function insertFeed(feedName) {
+        const feed = await getFeed(feedName);
+        const elements = feed.map(e => createPost(e.author, e.text));
+        elements.at(-1).style.borderBottomWidth = '0px';
+
+        const main = document.getElementById('posts');
+        main.innerHTML = '';
+        main.append(...elements);
+      }
+    </script>
+  </head>
+  <body>
+    <label for="feed">Choose feed:</label><br />
+    <select onchange="javascript: insertFeed(this[selectedIndex].value)">
+      <option selected>-- Choose --</option>
+      <option value="hebrew-feed-all">Hebrew All</option>
+      <option value="hebrew-feed">Hebrew Posts</option>
+      <option value="hebrew-noobs">Hebrew Noobs</option>
+      <option value="yiddish-all">Yiddish All</option>
+    </select>
+
+    <div id="posts"></div>
+  </body>
+</html>
