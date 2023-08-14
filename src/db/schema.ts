@@ -1,6 +1,7 @@
 export type DatabaseSchema = {
   post: PostSchema;
   sub_state: SubStateSchema;
+  author_language: AuthorLanguageViewSchema;
 };
 
 export type PostSchema = {
@@ -16,4 +17,9 @@ export type PostSchema = {
 export type SubStateSchema = {
   service: string;
   cursor: number;
+};
+
+export type AuthorLanguageViewSchema = {
+  author: string;
+  language: string | null;
 };

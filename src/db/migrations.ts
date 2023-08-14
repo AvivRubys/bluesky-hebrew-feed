@@ -1,4 +1,5 @@
 import { Kysely, MigrationProvider, sql } from 'kysely';
+import { DatabaseSchema } from './schema';
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
@@ -11,6 +12,7 @@ export const migrationProvider: MigrationProvider = {
       '006': addIndexOnAuthor,
       '007': optimizeIndexes,
       '008': removeLanguageDefault,
+      '009': createAuthorLanguageView,
     };
   },
 };
@@ -118,6 +120,29 @@ const removeLanguageDefault = {
     await db.schema
       .alterTable('post')
       .alterColumn('language', (c) => c.dropDefault())
+      .execute();
+  },
+};
+
+const createAuthorLanguageView = {
+  async up(db: Kysely<DatabaseSchema>) {
+    await db.schema
+      .createView('author_language')
+      .materialized()
+      .as(
+        sql`
+SELECT
+  author,
+  CASE 
+    WHEN COUNT(*) <= 10 THEN NULL
+    WHEN 1.0 * COUNT(*) FILTER (WHERE language IN ('he', 'iw')) / COUNT(*) > 0.6 THEN 'he'
+    WHEN 1.0 * COUNT(*) FILTER (WHERE language = 'yi') / COUNT(*) > 0.6 THEN 'yi'
+    ELSE NULL
+  END AS "language"
+FROM post
+GROUP BY author;
+      `,
+      )
       .execute();
   },
 };

@@ -17,6 +17,11 @@ export function hasHebrewLetters(text: string) {
 export const LANGS_HEBREW = ['he', 'iw'];
 export const LANGS_YIDDISH = ['yi'];
 export const LANG_UNKNOWN = 'unknown';
+export const HEBREW_LOOKALIKES = [
+  ...LANGS_HEBREW,
+  ...LANGS_YIDDISH,
+  LANG_UNKNOWN,
+];
 
 const classifier = new FastText.Classifier(path.join(__dirname, 'model.ftz'));
 const indexer_language_detections = new Histogram({
