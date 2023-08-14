@@ -57,7 +57,7 @@ function createLanguageFeed(
 
       // Solve the "author who always posts in a specific language whose posts still get misidentified" problem
       .innerJoin('author_language', (eb) =>
-        eb.onRef('post.author', '==', 'author_language.author'),
+        eb.onRef('post.author', '=', 'author_language.author'),
       )
       .where((eb) =>
         eb.or([

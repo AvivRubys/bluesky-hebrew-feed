@@ -128,7 +128,6 @@ const createAuthorLanguageView = {
   async up(db: Kysely<DatabaseSchema>) {
     await db.schema
       .createView('author_language')
-      .orReplace()
       .materialized()
       .as(
         sql`
