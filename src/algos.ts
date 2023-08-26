@@ -9,6 +9,7 @@ import { PostSchema } from './db/schema';
 import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
 import { FILTERED_USERS } from './util/userlists';
 import { AppContext } from './context';
+import logger from './logger';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -116,9 +117,14 @@ async function experimentsFeed(ctx: AppContext, params: QueryParams) {
     return { feed: [] };
   }
 
-  const file = await fs.readFile(ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH);
-  const contents = file.toString();
-  return JSON.parse(contents) as AlgoOutput;
+  try {
+    const file = await fs.readFile(ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH);
+    const contents = file.toString();
+    return JSON.parse(contents) as AlgoOutput;
+  } catch (err) {
+    logger.error(err, 'Error rendering experimental feed');
+    return { feed: [] };
+  }
 }
 
 type AlgoHandler = (
