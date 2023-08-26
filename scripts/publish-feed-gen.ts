@@ -32,6 +32,12 @@ const feeds = [
       "All posts and replies in yiddish.\nThis feed is open source, you're welcome to help!",
     avatar: path.join(__dirname, 'feed-avatars', 'ע.png'),
   },
+  {
+    recordName: 'experiment-feed',
+    displayName: 'experiments',
+    description: 'Nothing to see here, running experiments.',
+    avatar: path.join(__dirname, 'feed-avatars', 'experiment.png'),
+  },
 ];
 
 const handle = 'avivr.dev';

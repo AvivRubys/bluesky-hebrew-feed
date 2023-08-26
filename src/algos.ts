@@ -1,5 +1,6 @@
+import fs from 'fs/promises';
 import { InvalidRequestError } from '@atproto/xrpc-server';
-import { SelectQueryBuilder, sql } from 'kysely';
+import { SelectQueryBuilder } from 'kysely';
 import {
   QueryParams,
   OutputSchema as AlgoOutput,
@@ -110,6 +111,16 @@ async function firstHebrewPostsFeed(
   return renderFeed(await builder.execute());
 }
 
+async function experimentsFeed(ctx: AppContext, params: QueryParams) {
+  if (!ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH) {
+    return { feed: [] };
+  }
+
+  const file = await fs.readFile(ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH);
+  const contents = file.toString();
+  return JSON.parse(contents) as AlgoOutput;
+}
+
 type AlgoHandler = (
   ctx: AppContext,
   params: QueryParams,
@@ -121,6 +132,7 @@ const algos: Record<string, AlgoHandler> = {
   'hebrew-feed-all': createLanguageFeed(LANGS_HEBREW, true),
   'hebrew-feed': createLanguageFeed(LANGS_HEBREW, false),
   'hebrew-noobs': firstHebrewPostsFeed,
+  'experiment-feed': experimentsFeed,
 };
 
 export default algos;
