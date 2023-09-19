@@ -1,6 +1,9 @@
+import { GeneratedAlways } from 'kysely';
+
 export type DatabaseSchema = {
   post: PostSchema;
   sub_state: SubStateSchema;
+  notified_users: NotifiedUsersSchema;
 };
 
 export type PostSchema = {
@@ -16,4 +19,9 @@ export type PostSchema = {
 export type SubStateSchema = {
   service: string;
   cursor: number;
+};
+
+export type NotifiedUsersSchema = {
+  did: string;
+  notifiedAt: GeneratedAlways<Date>;
 };

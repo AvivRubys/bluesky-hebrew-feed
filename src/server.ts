@@ -8,11 +8,13 @@ import { FirehoseSubscription } from './subscription';
 import { Config } from './config';
 import { createApi } from './api';
 import { AppContext } from './context';
+import { runNotifyBot } from './notify-bot';
 
 export class FeedGenerator {
   public server?: http.Server;
 
   constructor(
+    private ctx: AppContext,
     private app: express.Application,
     private db: Database,
     private firehose: FirehoseSubscription,
@@ -43,13 +45,23 @@ export class FeedGenerator {
 
     const app = createApi(ctx);
 
-    return new FeedGenerator(app, db, firehose, cfg);
+    return new FeedGenerator(ctx, app, db, firehose, cfg);
   }
 
-  async start(): Promise<http.Server> {
+  async loginToBskyAgent() {
+    await this.ctx.bsky.login({
+      identifier: this.ctx.cfg.BLUESKY_CLIENT_LOGIN_IDENTIFIER,
+      password: this.ctx.cfg.BLUESKY_CLIENT_LOGIN_PASSWORD,
+    });
+  }
+
+  async start() {
     await migrateToLatest(this.db);
+    await this.loginToBskyAgent();
+
     this.firehose.run(this.cfg.SUBSCRIPTION_RECONNECT_DELAY);
     this.server = this.app.listen(this.cfg.PORT, this.cfg.HOST);
+    runNotifyBot(this.ctx);
     await events.once(this.server, 'listening');
     return this.server;
   }
