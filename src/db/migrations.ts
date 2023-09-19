@@ -11,6 +11,7 @@ export const migrationProvider: MigrationProvider = {
       '006': addIndexOnAuthor,
       '007': optimizeIndexes,
       '008': removeLanguageDefault,
+      '009': createNotifiedUsersTable,
     };
   },
 };
@@ -118,6 +119,16 @@ const removeLanguageDefault = {
     await db.schema
       .alterTable('post')
       .alterColumn('language', (c) => c.dropDefault())
+      .execute();
+  },
+};
+
+const createNotifiedUsersTable = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createTable('notified_users')
+      .addColumn('did', 'varchar', (c) => c.primaryKey())
+      .addColumn('notifiedAt', 'timestamp', (c) => c.defaultTo(sql`NOW()`))
       .execute();
   },
 };
