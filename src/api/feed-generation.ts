@@ -1,4 +1,4 @@
-import { Histogram } from 'prom-client';
+import { Counter, Histogram } from 'prom-client';
 import { InvalidRequestError } from '@atproto/xrpc-server';
 import { AtUri } from '@atproto/uri';
 import { Server } from '../lexicon';
@@ -11,7 +11,13 @@ import { AppContext } from '../context';
 const feedGenerationHistogram = new Histogram({
   name: 'feed_generation_duration',
   help: 'Feed generation duration',
-  labelNames: ['actor', 'status', 'feed'],
+  labelNames: ['status', 'feed'],
+});
+
+const feedGenerations = new Counter({
+  name: 'feed_generation',
+  help: 'Feed generations',
+  labelNames: ['actor', 'feed'],
 });
 
 function decipherAlgorithm(publisherDid: string, params: QueryParams) {
@@ -40,12 +46,12 @@ export default function (server: Server, ctx: AppContext) {
     );
     const actor = getRequestingActor(req);
     const endTimer = feedGenerationHistogram.startTimer({
-      actor: actor ?? 'unknown',
       feed: feedUri.rkey,
     });
     try {
       const body = await feedGenerator(ctx, params, actor);
       endTimer({ status: 'success' });
+      feedGenerations.inc({ actor, feed: feedUri.rkey });
 
       return {
         encoding: 'application/json',

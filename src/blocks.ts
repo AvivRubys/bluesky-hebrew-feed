@@ -4,13 +4,12 @@ import { LRUCache } from 'lru-cache';
 import logger from './logger';
 import { Config } from './config';
 import { measure } from './util/monitoring';
-import { AsyncIterable } from 'ix';
 import { from } from 'ix/asynciterable';
 
 const block_fetch_cache = new Counter({
   name: 'block_fetch_cache',
   help: 'Hits/misses of blocklist fetching',
-  labelNames: ['status', 'list_size'],
+  labelNames: ['status'],
 });
 
 const block_fetch_duration = new Histogram({
@@ -24,7 +23,7 @@ export class BlockService {
 
   constructor(private bsky: BskyAgent, config: Config) {
     this.#cache = new LRUCache<string, string[]>({
-      max: 1000,
+      max: 2000,
       ttl: config.CACHE_TTL_MS,
     });
   }
@@ -32,7 +31,7 @@ export class BlockService {
   async getBlocksFor(actor: string) {
     if (this.#cache.has(actor)) {
       const blocks = this.#cache.get(actor);
-      block_fetch_cache.inc({ status: 'hit', list_size: blocks?.length });
+      block_fetch_cache.inc({ status: 'hit' });
 
       return blocks;
     }
@@ -40,7 +39,7 @@ export class BlockService {
     const blocks = await from(this.getBlocksFromSource(actor))
       .take(100)
       .toArray();
-    block_fetch_cache.inc({ status: 'miss', list_size: blocks?.length });
+    block_fetch_cache.inc({ status: 'miss' });
     if (blocks === null) {
       return [];
     }
