@@ -60,25 +60,21 @@ export abstract class FirehoseSubscriptionBase {
   async processSubscription() {
     logger.info('Starting repo subscription...');
 
-    for await (const commits of AsyncIterable.from(this.sub).pipe(
+    for await (const commit of AsyncIterable.from(this.sub).pipe(
       filter(isCommit),
-      bufferCountOrTime(2000, 10000),
+      // bufferCountOrTime(2000, 10000),
     )) {
-      if (commits.length === 0) {
-        continue;
-      }
-
       const endTimer = handle_commits_histogram.startTimer();
       try {
-        await this.handleCommits(commits);
+        await this.handleCommits([commit]);
       } catch (err) {
         logger.error(err, 'repo subscription could not handle message');
       }
       endTimer();
 
-      const lastEvent = commits.at(-1)!;
+      const lastEvent = commit;
       this.lastEventDate = new Date(lastEvent.time);
-      commits_handled.inc(commits.length);
+      commits_handled.inc();
       commit_lag.set(differenceInMilliseconds(new Date(), this.lastEventDate));
       await this.updateCursor(lastEvent.seq);
     }
