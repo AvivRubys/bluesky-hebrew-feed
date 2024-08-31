@@ -2,7 +2,7 @@ import { differenceInMilliseconds } from 'date-fns';
 import { Counter, Gauge, Histogram } from 'prom-client';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
-import { filter } from 'ix/asynciterable/operators';
+import { bufferCountOrTime, filter } from 'ix/asynciterable/operators';
 import { Subscription } from '@atproto/xrpc-server';
 import { cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
@@ -62,7 +62,7 @@ export abstract class FirehoseSubscriptionBase {
 
     for await (const commits of AsyncIterable.from(this.sub).pipe(
       filter(isCommit),
-      bufferTime(1000),
+      bufferCountOrTime(2000, 10000),
     )) {
       if (commits.length === 0) {
         continue;
