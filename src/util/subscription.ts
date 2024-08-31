@@ -30,7 +30,7 @@ const commit_lag = new Gauge({
 const handle_commits_histogram = new Histogram({
   name: 'handle_commit',
   help: 'Handle commit phase',
-  buckets: [100, 250, 500, 1000, 2000, 5000],
+  buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000],
 });
 
 export abstract class FirehoseSubscriptionBase {
