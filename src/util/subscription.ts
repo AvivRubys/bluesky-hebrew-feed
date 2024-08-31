@@ -1,5 +1,5 @@
 import { differenceInMilliseconds } from 'date-fns';
-import { Counter, Gauge } from 'prom-client';
+import { Counter, Gauge, Histogram } from 'prom-client';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
 import { filter } from 'ix/asynciterable/operators';
@@ -25,6 +25,12 @@ const commits_handled = new Counter({
 const commit_lag = new Gauge({
   name: 'indexer_commit_lag',
   help: 'Indexer firehose handling lag',
+});
+
+const handle_commits_histogram = new Histogram({
+  name: 'handle_commit',
+  help: 'Handle commit phase',
+  buckets: [100, 250, 500, 1000, 2000, 5000],
 });
 
 export abstract class FirehoseSubscriptionBase {
@@ -56,17 +62,19 @@ export abstract class FirehoseSubscriptionBase {
 
     for await (const commits of AsyncIterable.from(this.sub).pipe(
       filter(isCommit),
-      bufferTime(5000),
+      bufferTime(1000),
     )) {
       if (commits.length === 0) {
         continue;
       }
 
+      const endTimer = handle_commits_histogram.startTimer();
       try {
         await this.handleCommits(commits);
       } catch (err) {
         logger.error(err, 'repo subscription could not handle message');
       }
+      endTimer();
 
       const lastEvent = commits.at(-1)!;
       this.lastEventDate = new Date(lastEvent.time);
