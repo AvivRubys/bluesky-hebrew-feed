@@ -1,4 +1,4 @@
-import { differenceInMilliseconds } from 'date-fns';
+import { differenceInMilliseconds, max } from 'date-fns';
 import { Counter, Gauge, Histogram } from 'prom-client';
 import { AsyncIterable } from 'ix';
 import { interval } from 'ix/asynciterable';
@@ -65,24 +65,31 @@ export abstract class FirehoseSubscriptionBase {
       filter(isCommit),
       bufferCountOrTime(5000, 10000),
     )) {
-      if (commits.length === 0) {
-        continue;
-      }
-
-      const endTimer = handle_commits_histogram.startTimer();
-      try {
-        await this.handleCommits(commits);
-      } catch (err) {
-        logger.error(err, 'repo subscription could not handle message');
-      }
-      endTimer();
-
-      const lastEvent = commits.at(-1)!;
-      this.lastEventDate = new Date(lastEvent.time);
-      commits_handled.inc(commits.length);
-      commit_lag.set(differenceInMilliseconds(new Date(), this.lastEventDate));
-      await this.updateCursor(lastEvent.seq);
+      void this.processBatch(commits);
     }
+  }
+
+  async processBatch(commits: Commit[]): Promise<void> {
+    if (commits.length === 0) {
+      return;
+    }
+
+    const endTimer = handle_commits_histogram.startTimer();
+    try {
+      await this.handleCommits(commits);
+    } catch (err) {
+      logger.error(err, 'repo subscription could not handle message');
+    }
+    endTimer();
+
+    const lastEvent = commits.at(-1)!;
+    const lastEventDate = new Date(lastEvent.time);
+    this.lastEventDate = !this.lastEventDate
+      ? lastEventDate
+      : max([lastEventDate, this.lastEventDate]);
+    commits_handled.inc(commits.length);
+    commit_lag.set(differenceInMilliseconds(new Date(), this.lastEventDate));
+    await this.updateCursor(lastEvent.seq);
   }
 
   async run(subscriptionReconnectDelay: number) {
