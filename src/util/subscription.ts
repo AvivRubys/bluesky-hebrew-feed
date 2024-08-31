@@ -16,6 +16,7 @@ import {
 import { Database } from '../db';
 import logger from '../logger';
 import { bufferTime } from './buffer-time';
+import { sql } from 'kysely';
 
 const commits_handled = new Counter({
   name: 'indexer_commits_handled',
@@ -97,7 +98,7 @@ export abstract class FirehoseSubscriptionBase {
   async updateCursor(cursor: number) {
     const result = await this.db
       .updateTable('sub_state')
-      .set({ cursor })
+      .set({ cursor: sql`GREATEST("cursor", ${cursor})` })
       .where('service', '=', this.service)
       .executeTakeFirst();
 
