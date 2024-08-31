@@ -19,9 +19,6 @@ const indexerPostsDeleted = new Counter({
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
     const ops = await Promise.all(commits.map(getOpsByType));
-    const postsToDelete = ops
-      .flatMap((op) => op.posts.deletes)
-      .map((del) => del.uri);
     const postsToCreate = await AsyncIterable.from(ops)
       .flatMap((op) => op.posts.creates)
       .filter((op) => hasHebrewLetters(op.record.text))
@@ -39,15 +36,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         };
       })
       .toArray();
-
-    if (postsToDelete.length > 0) {
-      indexerPostsDeleted.inc(postsToDelete.length);
-
-      await this.db
-        .deleteFrom('post')
-        .where('uri', 'in', postsToDelete)
-        .execute();
-    }
 
     if (postsToCreate.length > 0) {
       indexerPostsCreated.inc(postsToCreate.length);
