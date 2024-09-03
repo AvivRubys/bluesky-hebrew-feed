@@ -23,15 +23,18 @@ export interface ThinCommit {
 //  1. To ensure we set blocks as transferable, for performance
 //  2. CID class gets mangled during postMessage, so this serializes and deserialized it properly
 export function serializeCommit(commit: Commit): MaybeTransferable<ThinCommit> {
-  return {
-    blocks: commit.blocks,
-    repo: commit.repo,
-    ops: commit.ops.map((op) => ({
-      action: op.action,
-      path: op.path,
-      cidRaw: op.cid?.toString(),
-    })),
-  };
+  return Transfer(
+    {
+      blocks: commit.blocks,
+      repo: commit.repo,
+      ops: commit.ops.map((op) => ({
+        action: op.action,
+        path: op.path,
+        cidRaw: op.cid?.toString(),
+      })),
+    },
+    [commit.blocks.buffer],
+  );
 }
 
 export function repopulateCommit(commit: ThinCommit) {
