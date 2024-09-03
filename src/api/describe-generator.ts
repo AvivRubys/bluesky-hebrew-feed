@@ -1,6 +1,6 @@
 import { Server } from '../lexicon';
 import algos from '../algos';
-import { AtUri } from '@atproto/uri';
+import { AtUri } from '@atproto/syntax';
 import { AppContext } from '../context';
 
 export default function (server: Server, ctx: AppContext) {

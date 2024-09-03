@@ -1,4 +1,4 @@
-import { AtUri } from '@atproto/uri';
+import { AtUri } from '@atproto/syntax';
 import { BskyAgent } from '@atproto/api';
 import { createDb } from '../src/db';
 

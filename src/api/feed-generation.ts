@@ -1,6 +1,6 @@
 import { Counter, Histogram } from 'prom-client';
 import { InvalidRequestError } from '@atproto/xrpc-server';
-import { AtUri } from '@atproto/uri';
+import { AtUri } from '@atproto/syntax';
 import { Server } from '../lexicon';
 import algos from '../algos';
 import logger from '../logger';
