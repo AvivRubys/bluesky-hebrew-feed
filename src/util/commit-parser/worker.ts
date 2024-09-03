@@ -41,7 +41,7 @@ export async function getOpsByType(
     }
   }
 
-  return Transfer(opsByType, [commit.blocks]);
+  return opsByType;
 }
 
 if (!isMainThread) {
