@@ -2,10 +2,9 @@ import { AsyncIterable } from 'ix';
 import { RichText } from '@atproto/api';
 import { Counter } from 'prom-client';
 import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
-import { FirehoseSubscriptionBase } from './util/subscription';
+import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription';
 import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
 import { Record as PostRecord } from './lexicon/types/app/bsky/feed/post';
-import { getOpsByType } from './util/commit-parser';
 
 const indexerPostsCreated = new Counter({
   name: 'indexer_posts_created',
