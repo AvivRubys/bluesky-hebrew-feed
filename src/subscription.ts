@@ -12,11 +12,6 @@ const indexerPostsCreated = new Counter({
   help: 'Posts indexed',
 });
 
-const indexerPostsDeleted = new Counter({
-  name: 'indexer_posts_deleted',
-  help: 'Posts deleted',
-});
-
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleCommits(commits: Commit[]) {
     const ops = await Promise.all(commits.map(getOpsByType));
