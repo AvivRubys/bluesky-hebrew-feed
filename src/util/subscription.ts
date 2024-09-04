@@ -120,7 +120,7 @@ export abstract class FirehoseSubscriptionBase {
       .where('service', '=', this.service)
       .executeTakeFirst();
 
-    console.log('Starting subscription from cursor', res?.cursor);
+    logger.info('Starting subscription from cursor=%d', res?.cursor);
     return res ? { cursor: res.cursor } : {};
   }
 }
