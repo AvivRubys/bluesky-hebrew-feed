@@ -11,11 +11,14 @@ const firehose_operations = new Counter({
   labelNames: ['action', 'collection'],
 });
 export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
-  if (
-    !evt.ops.some(
-      (op) => op.action === 'create' && op.path.startsWith(ids.AppBskyFeedPost),
-    )
-  ) {
+  let shouldParse = false;
+  for (const op of evt.ops) {
+    const [collection] = op.path.split('/');
+    shouldParse ||= op.action && collection === ids.AppBskyFeedPost;
+
+    firehose_operations.inc({ action: op.action, collection });
+  }
+  if (!shouldParse) {
     return { posts: { creates: [] } };
   }
 
