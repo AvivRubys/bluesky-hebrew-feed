@@ -119,6 +119,8 @@ export abstract class FirehoseSubscriptionBase {
       .selectAll()
       .where('service', '=', this.service)
       .executeTakeFirst();
+
+    console.log('Starting subscription from cursor', res?.cursor);
     return res ? { cursor: res.cursor } : {};
   }
 }
