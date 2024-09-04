@@ -14,7 +14,8 @@ export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
   let shouldParse = false;
   for (const op of evt.ops) {
     const [collection] = op.path.split('/');
-    shouldParse ||= op.action && collection === ids.AppBskyFeedPost;
+    shouldParse ||=
+      op.action === 'create' && collection === ids.AppBskyFeedPost;
 
     firehose_operations.inc({ action: op.action, collection });
   }
