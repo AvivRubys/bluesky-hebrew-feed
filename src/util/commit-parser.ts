@@ -1,9 +1,24 @@
 import { Counter } from 'prom-client';
-import { cborToLexRecord, readCar } from '@atproto/repo';
+import { BlockMap, cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
 import { ids, lexicons } from '../lexicon/lexicons';
 import { Record as PostRecord } from '../lexicon/types/app/bsky/feed/post';
 import { Commit } from '../lexicon/types/com/atproto/sync/subscribeRepos';
+import { CID } from 'multiformats/cid';
+
+class LazyCar {
+  private car: { roots: CID[]; blocks: BlockMap } | null = null;
+
+  constructor(private blocks: Uint8Array) {}
+
+  async getBlock(cid: CID): Promise<Uint8Array | undefined> {
+    if (this.car === null) {
+      this.car = await readCar(this.blocks);
+    }
+
+    return this.car.blocks.get(cid);
+  }
+}
 
 const firehose_operations = new Counter({
   name: 'firehose_operations',
@@ -11,19 +26,7 @@ const firehose_operations = new Counter({
   labelNames: ['action', 'collection'],
 });
 export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
-  let shouldParse = false;
-  for (const op of evt.ops) {
-    const [collection] = op.path.split('/');
-    shouldParse ||=
-      op.action === 'create' && collection === ids.AppBskyFeedPost;
-
-    firehose_operations.inc({ action: op.action, collection });
-  }
-  if (!shouldParse) {
-    return { posts: { creates: [] } };
-  }
-
-  const car = await readCar(evt.blocks);
+  const car = new LazyCar(evt.blocks);
   const opsByType: OperationsByType = {
     posts: { creates: [] },
   };
@@ -33,17 +36,27 @@ export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
     const [collection] = op.path.split('/');
     firehose_operations.inc({ action: op.action, collection });
 
-    if (op.action === 'update') continue; // updates not supported yet
+    if (
+      !op.cid ||
+      op.action !== 'create' ||
+      collection !== ids.AppBskyFeedPost
+    ) {
+      continue;
+    }
 
-    if (op.action === 'create') {
-      if (!op.cid) continue;
-      const recordBytes = car.blocks.get(op.cid);
-      if (!recordBytes) continue;
-      const record = cborToLexRecord(recordBytes);
-      const create = { uri, cid: op.cid.toString(), author: evt.repo };
-      if (collection === ids.AppBskyFeedPost && isPost(record)) {
-        opsByType.posts.creates.push({ record, ...create });
-      }
+    const recordBytes = await car.getBlock(op.cid);
+    if (!recordBytes) {
+      continue;
+    }
+
+    const record = cborToLexRecord(recordBytes);
+    if (isPost(record)) {
+      opsByType.posts.creates.push({
+        record,
+        uri,
+        cid: op.cid.toString(),
+        author: evt.repo,
+      });
     }
   }
 
