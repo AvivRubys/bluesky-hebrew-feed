@@ -59,7 +59,7 @@ export abstract class FirehoseSubscriptionBase {
 
     for await (const commits of AsyncIterable.from(this.sub).pipe(
       filter(isCommit),
-      bufferCountOrTime(5000, 10000),
+      bufferCountOrTime(2000, 50000),
     )) {
       if (commits.length === 0) {
         continue;
