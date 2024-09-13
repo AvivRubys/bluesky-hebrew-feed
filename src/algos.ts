@@ -152,7 +152,7 @@ type AlgoHandler = (
 const algos: Record<string, AlgoHandler> = {
   'yiddish-all': createLanguageFeed(LANGS_YIDDISH, true),
   'hebrew-feed-all': createLanguageFeed(LANGS_HEBREW, true),
-  'hebrew-feed-milifney': oneYearAgo(createLanguageFeed(LANGS_HEBREW, true)),
+  'hebrew-milifney': oneYearAgo(createLanguageFeed(LANGS_HEBREW, true)),
   'hebrew-feed': createLanguageFeed(LANGS_HEBREW, false),
   'hebrew-noobs': firstHebrewPostsFeed,
   'experiment-feed': experimentsFeed,

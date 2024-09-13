@@ -26,7 +26,7 @@ const feeds = [
     avatar: path.join(__dirname, 'feed-avatars', 'ת.png'),
   },
   {
-    recordName: 'hebrew-feed-milifney',
+    recordName: 'hebrew-milifney',
     displayName: 'עברית לפני שנה',
     description: 'כל הפוסטים והתגובות בעברית מלפני בדיוק שנה.' + suffix,
     avatar: path.join(__dirname, 'feed-avatars', 'ז.png'),
@@ -47,7 +47,7 @@ const feeds = [
 ];
 
 const handle = 'avivr.dev';
-const password = '';
+const password = 'hghh-4pzy-j43w-7z5q';
 
 (async () => {
   for (const feed of feeds) {
@@ -85,14 +85,6 @@ async function createFeed(
   // only update this if in a test environment
   const agent = new AtpAgent({ service: 'https://bsky.social' });
   await agent.login({ identifier: handle, password });
-
-  try {
-    await agent.api.app.bsky.feed.describeFeedGenerator();
-  } catch (err) {
-    throw new Error(
-      'The bluesky server is not ready to accept published custom feeds yet',
-    );
-  }
 
   let avatarRef: BlobRef | undefined;
   if (avatar) {
