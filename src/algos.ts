@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { InvalidRequestError } from '@atproto/xrpc-server';
 import { SelectQueryBuilder } from 'kysely';
+import { addYears } from 'date-fns';
 import {
   QueryParams,
   OutputSchema as AlgoOutput,
@@ -127,6 +128,21 @@ async function experimentsFeed(ctx: AppContext, params: QueryParams) {
   }
 }
 
+function oneYearAgo(feedGenerator: AlgoHandler) {
+  return async (ctx: AppContext, params: QueryParams, actor?: string) => {
+    if (params.cursor) {
+      return await feedGenerator(ctx, params, actor);
+    }
+
+    const oneYearAgo = addYears(new Date(), -1);
+    return await feedGenerator(
+      ctx,
+      { ...params, cursor: oneYearAgo.getTime().toString() },
+      actor,
+    );
+  };
+}
+
 type AlgoHandler = (
   ctx: AppContext,
   params: QueryParams,
@@ -136,6 +152,7 @@ type AlgoHandler = (
 const algos: Record<string, AlgoHandler> = {
   'yiddish-all': createLanguageFeed(LANGS_YIDDISH, true),
   'hebrew-feed-all': createLanguageFeed(LANGS_HEBREW, true),
+  'hebrew-feed-milifney': oneYearAgo(createLanguageFeed(LANGS_HEBREW, true)),
   'hebrew-feed': createLanguageFeed(LANGS_HEBREW, false),
   'hebrew-noobs': firstHebrewPostsFeed,
   'experiment-feed': experimentsFeed,

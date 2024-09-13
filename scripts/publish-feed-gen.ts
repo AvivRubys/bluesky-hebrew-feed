@@ -26,6 +26,12 @@ const feeds = [
     avatar: path.join(__dirname, 'feed-avatars', 'ת.png'),
   },
   {
+    recordName: 'hebrew-feed-milifney',
+    displayName: 'עברית לפני שנה',
+    description: 'כל הפוסטים והתגובות בעברית מלפני בדיוק שנה.' + suffix,
+    avatar: path.join(__dirname, 'feed-avatars', 'ז.png'),
+  },
+  {
     recordName: 'yiddish-all',
     displayName: 'יידיש',
     description:
