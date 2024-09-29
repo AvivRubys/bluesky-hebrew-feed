@@ -12,6 +12,7 @@ export const migrationProvider: MigrationProvider = {
       '007': optimizeIndexes,
       '008': removeLanguageDefault,
       '009': createNotifiedUsersTable,
+      '010': cursorToString,
     };
   },
 };
@@ -129,6 +130,15 @@ const createNotifiedUsersTable = {
       .createTable('notified_users')
       .addColumn('did', 'varchar', (c) => c.primaryKey())
       .addColumn('notifiedAt', 'timestamp', (c) => c.defaultTo(sql`NOW()`))
+      .execute();
+  },
+};
+
+const cursorToString = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .alterTable('sub_state')
+      .alterColumn('cursor', (c) => c.setDataType('varchar'))
       .execute();
   },
 };

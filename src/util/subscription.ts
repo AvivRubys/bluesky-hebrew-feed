@@ -94,7 +94,7 @@ export abstract class FirehoseSubscriptionBase {
   async updateCursor(cursor: number) {
     const result = await this.db
       .updateTable('sub_state')
-      .set({ cursor: sql`GREATEST("cursor", ${cursor})` })
+      .set({ cursor: cursor.toString() })
       .where('service', '=', this.service)
       .executeTakeFirst();
 
@@ -103,7 +103,7 @@ export abstract class FirehoseSubscriptionBase {
 
       await this.db
         .insertInto('sub_state')
-        .values({ service: this.service, cursor })
+        .values({ service: this.service, cursor: cursor.toString() })
         .onConflict((oc) =>
           oc
             .column('service')
@@ -113,7 +113,7 @@ export abstract class FirehoseSubscriptionBase {
     }
   }
 
-  async getCursor(): Promise<{ cursor?: number }> {
+  async getCursor(): Promise<{ cursor?: string }> {
     const res = await this.db
       .selectFrom('sub_state')
       .selectAll()

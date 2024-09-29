@@ -18,7 +18,7 @@ export type PostSchema = {
 
 export type SubStateSchema = {
   service: string;
-  cursor: number;
+  cursor: string;
 };
 
 export type NotifiedUsersSchema = {
