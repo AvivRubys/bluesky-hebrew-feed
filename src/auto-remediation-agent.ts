@@ -9,7 +9,7 @@ const port = process.env.PORT ?? '8080';
 
 async function healthcheck() {
   try {
-    const url = `http://${host}:${port}/health`;
+    const url = `http://${host}:${port}/health/database`;
     console.log('Healthchecking url', url);
     const result = await fetch(url);
     console.log('Response from healthcheck status', result.status);
