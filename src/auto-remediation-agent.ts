@@ -6,6 +6,8 @@ const execAsync = util.promisify(exec);
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ?? '8080';
+const checkInterval = 30_000;
+const restartGracePeriod = 120_000;
 
 async function healthcheck() {
   try {
@@ -31,12 +33,12 @@ async function restartServer() {
 async function run() {
   let lastResult = true;
   while (true) {
-    await setTimeout(30_000);
+    await setTimeout(checkInterval);
     const result = await healthcheck();
     if (!lastResult && !result) {
       await restartServer();
       lastResult = true;
-      await setTimeout(60_000);
+      await setTimeout(restartGracePeriod);
     } else {
       lastResult = result;
     }
