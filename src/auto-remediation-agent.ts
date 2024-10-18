@@ -9,16 +9,28 @@ const port = process.env.PORT ?? '8080';
 const checkInterval = 30_000;
 const restartGracePeriod = 120_000;
 
+type Logger = typeof console.log;
+const addTimestamp =
+  (fn: Logger) =>
+  (...[message, ...args]: Parameters<Logger>) =>
+    fn(`${new Date().toISOString()} | ${message}`, ...args);
+
+const logger = {
+  log: addTimestamp(console.log),
+  warn: addTimestamp(console.warn),
+  error: addTimestamp(console.error),
+};
+
 async function healthcheck() {
   try {
     const url = `http://${host}:${port}/health`;
-    console.log('Healthchecking url', url);
+    logger.log('Healthchecking url', url);
     const result = await fetch(url);
-    console.log('Response from healthcheck status', result.status);
+    logger.log('Response from healthcheck status', result.status);
 
     return result.status === 200;
   } catch (err) {
-    console.error('Something has gone wrong in health checking', err);
+    logger.error('Something has gone wrong in health checking', err);
     return false;
   }
 }
