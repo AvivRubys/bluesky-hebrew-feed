@@ -36,10 +36,10 @@ async function healthcheck() {
 }
 
 async function restartServer() {
+  logger.warn('Restarting server');
   const { stdout, stderr } = await execAsync('pm2 restart bluesky-feeds');
-  console.log('Ran restart');
-  console.log('Output: ', stdout);
-  console.log('Error: ', stderr);
+  logger.warn('Output: ', stdout);
+  logger.warn('Error: ', stderr);
 }
 
 async function run() {
