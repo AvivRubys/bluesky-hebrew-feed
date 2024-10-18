@@ -5,22 +5,13 @@ import { Database } from '../db';
 import logger from '../logger';
 import { FirehoseSubscription } from '../subscription';
 
-export function createDatabaseHealthCheckRoute(db: Database) {
+export function createHealthCheckRoute(
+  db: Database,
+  firehose: FirehoseSubscription,
+) {
   return async (_: Request, res: Response) => {
     try {
-      await databaseCheck(db);
-      res.status(200).send();
-    } catch (err) {
-      logger.warn(err, 'Health check failed');
-      res.status(503).send();
-    }
-  };
-}
-
-export function createFirehoseHealthCheckRoute(firehose: FirehoseSubscription) {
-  return async (_: Request, res: Response) => {
-    try {
-      await firehoseCheck(firehose);
+      await Promise.all([databaseCheck(db), firehoseCheck(firehose)]);
       res.status(200).send();
     } catch (err) {
       logger.warn(err, 'Health check failed');

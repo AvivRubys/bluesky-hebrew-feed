@@ -4,10 +4,7 @@ import promBundle from 'express-prom-bundle';
 import morgan from 'morgan';
 import feedGeneration from './feed-generation';
 import describeGenerator from './describe-generator';
-import {
-  createDatabaseHealthCheckRoute,
-  createFirehoseHealthCheckRoute,
-} from './health-check';
+import { createHealthCheckRoute as healthCheckRoute } from './health-check';
 import wellKnown from './well-known';
 import { createServer } from '../lexicon';
 import './configure-morgan';
@@ -32,8 +29,7 @@ export function createApi(ctx: AppContext) {
   describeGenerator(server, ctx);
   app.use(server.xrpc.router);
   app.use(wellKnown(ctx));
-  app.get('/health/firehose', createFirehoseHealthCheckRoute(ctx.firehose));
-  app.get('/health/database', createDatabaseHealthCheckRoute(ctx.db));
+  app.get('/health', healthCheckRoute(ctx.db, ctx.firehose));
   app.use(express.static(path.join(__dirname, 'static')));
 
   return app;
