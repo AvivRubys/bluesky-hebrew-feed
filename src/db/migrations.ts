@@ -147,7 +147,7 @@ const cursorToString = {
 const addCreatedAtToPost = {
   async up(db: Kysely<unknown>) {
     await db.schema
-      .createTable('post')
+      .alterTable('post')
       .addColumn('createdAt', 'varchar')
       .execute();
   },
