@@ -13,6 +13,7 @@ export const migrationProvider: MigrationProvider = {
       '008': removeLanguageDefault,
       '009': createNotifiedUsersTable,
       '010': cursorToString,
+      '011': addCreatedAtToPost,
     };
   },
 };
@@ -139,6 +140,15 @@ const cursorToString = {
     await db.schema
       .alterTable('sub_state')
       .alterColumn('cursor', (c) => c.setDataType('varchar'))
+      .execute();
+  },
+};
+
+const addCreatedAtToPost = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createTable('post')
+      .addColumn('createdAt', 'varchar')
       .execute();
   },
 };

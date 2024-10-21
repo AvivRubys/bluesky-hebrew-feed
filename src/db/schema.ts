@@ -11,6 +11,7 @@ export type PostSchema = {
   author: string;
   cid: string;
   indexedAt: string;
+  createdAt?: string;
   replyRoot?: string;
   replyTo?: string;
   language: string;
