@@ -11,6 +11,7 @@ import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
 import { FILTERED_USERS } from './util/userlists';
 import { AppContext } from './context';
 import logger from './logger';
+import { orderNullsLast } from './db/util';
 
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
@@ -55,6 +56,7 @@ function createLanguageFeed(
       .select(['indexedAt', 'uri'])
       .where('language', 'in', languages)
       .where('author', 'not in', FILTERED_USERS)
+      .orderBy('createdAt', orderNullsLast('desc'))
       .orderBy('indexedAt', 'desc')
       .orderBy('cid', 'desc')
       .limit(params.limit);
