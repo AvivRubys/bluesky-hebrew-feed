@@ -16,6 +16,7 @@ export const migrationProvider: MigrationProvider = {
       '011': addCreatedAtToPost,
       '012': addEffectiveTimestampToPost,
       '013': optimizeIndexes2,
+      '014': addRecommendedIndexes,
     };
   },
 };
@@ -185,6 +186,30 @@ const optimizeIndexes2 = {
       .createIndex('post_effectivetimestamp_index')
       .on('post')
       .column('effectiveTimestamp')
+      .using('btree')
+      .execute();
+  },
+};
+
+const addRecommendedIndexes = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createIndex('language_feed_index')
+      .on('post')
+      .columns([
+        'language',
+        'author',
+        'replyTo',
+        'effectiveTimestamp desc',
+        'cid desc',
+      ])
+      .using('btree')
+      .execute();
+
+    await db.schema
+      .createIndex('language_feed_block_subquery_index')
+      .on('post')
+      .columns(['author', 'uri'])
       .using('btree')
       .execute();
   },
