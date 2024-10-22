@@ -1,4 +1,4 @@
-import { Generated, GeneratedAlways } from 'kysely';
+import { GeneratedAlways } from 'kysely';
 
 export type DatabaseSchema = {
   post: PostSchema;
@@ -12,7 +12,6 @@ export type PostSchema = {
   cid: string;
   indexedAt: string;
   createdAt?: string;
-  effectiveTimestamp: Generated<string>;
   replyRoot?: string;
   replyTo?: string;
   language: string;
