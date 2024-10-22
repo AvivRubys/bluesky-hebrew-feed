@@ -14,7 +14,6 @@ export const migrationProvider: MigrationProvider = {
       '009': createNotifiedUsersTable,
       '010': cursorToString,
       '011': addCreatedAtToPost,
-      '012': addActualDateToPost,
     };
   },
 };
@@ -150,17 +149,6 @@ const addCreatedAtToPost = {
     await db.schema
       .alterTable('post')
       .addColumn('createdAt', 'varchar')
-      .execute();
-  },
-};
-
-const addActualDateToPost = {
-  async up(db: Kysely<unknown>) {
-    await db.schema
-      .alterTable('post')
-      .addColumn('effectiveTimestamp', 'varchar', (c) =>
-        c.notNull().defaultTo(sql`LEAST("indexedAt", "createdAt")`),
-      )
       .execute();
   },
 };

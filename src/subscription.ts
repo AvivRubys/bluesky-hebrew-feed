@@ -6,7 +6,6 @@ import { FirehoseSubscriptionBase } from './util/subscription';
 import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
 import { Record as PostRecord } from './lexicon/types/app/bsky/feed/post';
 import { getOpsByType } from './util/commit-parser';
-import { min } from 'date-fns';
 
 const indexerPostsCreated = new Counter({
   name: 'indexer_posts_created',
@@ -21,9 +20,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .filter((op) => hasHebrewLetters(op.record.text))
       .map(async (create) => {
         const language = await extractTextLanguage(removeFacets(create.record));
-        const indexedAt = new Date();
-        const createdAt = create.record.createdAt;
-        const effectiveTimestamp = min([indexedAt, createdAt]).toISOString();
 
         return {
           uri: create.uri,
@@ -31,9 +27,8 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
           cid: create.cid,
           replyTo: create.record.reply?.parent.uri,
           replyRoot: create.record.reply?.root.uri,
-          indexedAt: indexedAt.toISOString(),
+          indexedAt: new Date().toISOString(),
           createdAt: create.record.createdAt,
-          effectiveTimestamp,
           language,
         };
       })
