@@ -14,6 +14,7 @@ export const migrationProvider: MigrationProvider = {
       '009': createNotifiedUsersTable,
       '010': cursorToString,
       '011': addCreatedAtToPost,
+      '012': addEffectiveTimestampToPost,
     };
   },
 };
@@ -149,6 +150,27 @@ const addCreatedAtToPost = {
     await db.schema
       .alterTable('post')
       .addColumn('createdAt', 'varchar')
+      .execute();
+  },
+};
+
+const addEffectiveTimestampToPost = {
+  async up(db: Kysely<any>) {
+    await db.schema
+      .alterTable('post')
+      .addColumn('effectiveTimestamp', 'varchar')
+      .execute();
+
+    await db
+      .updateTable('post')
+      .set({
+        effectiveTimestamp: sql<string>`LEAST("indexedAt", "createdAt")`,
+      })
+      .execute();
+
+    await db.schema
+      .alterTable('post')
+      .alterColumn('effectiveTimestamp', (c) => c.setNotNull())
       .execute();
   },
 };
