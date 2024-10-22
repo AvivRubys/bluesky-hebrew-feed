@@ -15,6 +15,7 @@ export const migrationProvider: MigrationProvider = {
       '010': cursorToString,
       '011': addCreatedAtToPost,
       '012': addEffectiveTimestampToPost,
+      '013': optimizeIndexes2,
     };
   },
 };
@@ -171,6 +172,20 @@ const addEffectiveTimestampToPost = {
     await db.schema
       .alterTable('post')
       .alterColumn('effectiveTimestamp', (c) => c.setNotNull())
+      .execute();
+  },
+};
+
+const optimizeIndexes2 = {
+  async up(db: Kysely<unknown>) {
+    // Should not be needed anymore
+    await db.schema.dropIndex('post_indexedat_index').execute();
+
+    await db.schema
+      .createIndex('post_effectivetimestamp_index')
+      .on('post')
+      .column('effectiveTimestamp')
+      .using('btree')
       .execute();
   },
 };
