@@ -1,7 +1,7 @@
 import http from 'http';
 import events from 'events';
 import express from 'express';
-import { BskyAgent } from '@atproto/api';
+import { AtpAgent } from '@atproto/api';
 import { createDb, Database, migrateToLatest } from './db';
 import { BlockService } from './blocks';
 import { FirehoseSubscription } from './subscription';
@@ -32,7 +32,7 @@ export class FeedGenerator {
       db,
       cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
     );
-    const bsky = new BskyAgent({ service: cfg.BLUESKY_API_ENDPOINT });
+    const bsky = new AtpAgent({ service: cfg.BLUESKY_API_ENDPOINT });
     const block = new BlockService(bsky, cfg);
 
     const ctx: AppContext = {

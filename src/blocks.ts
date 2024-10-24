@@ -1,5 +1,5 @@
 import { Counter, Histogram } from 'prom-client';
-import { BskyAgent } from '@atproto/api';
+import { AtpAgent } from '@atproto/api';
 import { LRUCache } from 'lru-cache';
 import logger from './logger';
 import { Config } from './config';
@@ -21,7 +21,7 @@ const block_fetch_duration = new Histogram({
 export class BlockService {
   #cache: LRUCache<string, string[]>;
 
-  constructor(private bsky: BskyAgent, config: Config) {
+  constructor(private bsky: AtpAgent, config: Config) {
     this.#cache = new LRUCache<string, string[]>({
       max: 2000,
       ttl: config.CACHE_TTL_MS,
