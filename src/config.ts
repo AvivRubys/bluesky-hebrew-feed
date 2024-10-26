@@ -1,6 +1,13 @@
 import { minutesToMilliseconds } from 'date-fns';
 import { z } from 'zod';
 
+const stringBooleanSchema = z.preprocess((val) => {
+  if (val === 'true' || val === true) return true;
+  if (val === 'false' || val === false) return false;
+
+  throw new Error("Expected 'true' or 'false', got " + val);
+}, z.boolean());
+
 const envSchema = z.object({
   // HTTP Server
   PORT: z.coerce.number().default(3000),
@@ -12,6 +19,7 @@ const envSchema = z.object({
   CACHE_TTL_MS: z.coerce.number().default(minutesToMilliseconds(30)),
 
   // Notifier bot
+  BOT_ENABLED: stringBooleanSchema.default(false),
   BOT_RUN_INTERVAL_MS: z.coerce.number().default(minutesToMilliseconds(2)),
   BOT_LOOKBACK_INTERVAL_MS: z.coerce
     .number()

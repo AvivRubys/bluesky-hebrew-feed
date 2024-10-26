@@ -6,10 +6,14 @@ import logger from './logger';
 import { RichText } from '@atproto/api';
 
 export async function runNotifyBot(ctx: AppContext) {
+  if (!ctx.cfg.BOT_ENABLED) {
+    logger.info('Notify bot is not enabled');
+    return;
+  }
+
+  logger.info('Notify bot is enabled, running bot...');
   for await (const _ of interval(ctx.cfg.BOT_RUN_INTERVAL_MS)) {
-    logger.debug('Botify bot running...');
-    await notifyNewPosters(ctx);
-    logger.debug('Botify bot completed.');
+    // await notifyNewPosters(ctx);
   }
 }
 
