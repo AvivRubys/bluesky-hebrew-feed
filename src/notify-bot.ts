@@ -13,7 +13,7 @@ export async function runNotifyBot(ctx: AppContext) {
 
   logger.info('Notify bot is enabled, running bot...');
   for await (const _ of interval(ctx.cfg.BOT_RUN_INTERVAL_MS)) {
-    // await notifyNewPosters(ctx);
+    await notifyNewPosters(ctx);
   }
 }
 
