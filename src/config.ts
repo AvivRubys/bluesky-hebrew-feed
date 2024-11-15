@@ -36,6 +36,13 @@ const envSchema = z.object({
   FEEDGEN_PUBLISHER_DID: z.string(),
   SUBSCRIPTION_RECONNECT_DELAY: z.number().default(3000),
   EXPERIMENT_FEED_SOURCE_FILEPATH: z.string().optional(),
+
+  // General
+  FILTERED_USERS: z
+    .string()
+    .transform((value) => value.split(','))
+    .pipe(z.string().trim().array())
+    .optional(),
 });
 
 export function parseEnvironment() {

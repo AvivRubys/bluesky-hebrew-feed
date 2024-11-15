@@ -61,6 +61,10 @@ function createLanguageFeed(
       .orderBy('cid', 'desc')
       .limit(params.limit);
 
+    if (Array.isArray(ctx.cfg.FILTERED_USERS)) {
+      builder = builder.where('author', 'not in', ctx.cfg.FILTERED_USERS);
+    }
+
     if (includeReplies) {
       if (actor) {
         const blocklist = await ctx.block.getBlocksFor(actor);
