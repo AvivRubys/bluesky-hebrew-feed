@@ -6,6 +6,7 @@ import { FirehoseSubscription } from './subscription';
 import { Config } from './config';
 import { createApi } from './api';
 import { runNotifyBot } from './notify-bot';
+import { FilteredUsersService } from './filtered-users';
 
 export async function runFeedGenerator(cfg: Config): Promise<void> {
   // Create
@@ -16,6 +17,7 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
   );
   const bsky = new AtpAgent({ service: cfg.BLUESKY_API_ENDPOINT });
   const block = new BlockService(bsky, cfg);
+  const filteredUsers = new FilteredUsersService(bsky, cfg)
 
   const ctx = {
     db,
@@ -23,6 +25,7 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
     block,
     firehose,
     bsky,
+    filteredUsers,
   };
 
   const app = createApi(ctx);
