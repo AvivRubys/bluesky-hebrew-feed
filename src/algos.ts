@@ -62,6 +62,7 @@ function createLanguageFeed(
       .limit(params.limit);
 
     if (Array.isArray(ctx.cfg.FILTERED_USERS)) {
+      logger.info("Filtering out users", {filteredUsers: FILTERED_USERS, configFilteredUsers: ctx.cfg.FILTERED_USERS});
       builder = builder.where('author', 'not in', ctx.cfg.FILTERED_USERS);
     }
 
