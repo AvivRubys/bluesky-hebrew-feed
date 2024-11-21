@@ -7,6 +7,7 @@ import { extractTextLanguage, hasHebrewLetters } from './util/hebrew';
 import { Record as PostRecord } from './lexicon/types/app/bsky/feed/post';
 import { getOpsByType } from './util/commit-parser';
 import { min } from 'date-fns';
+import logger from './logger';
 
 const indexerPostsCreated = new Counter({
   name: 'indexer_posts_created',
@@ -24,6 +25,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         const indexedAt = new Date();
         const createdAt = create.record.createdAt;
         const effectiveTimestamp = min([indexedAt, createdAt]).toISOString();
+        logger.info({uri: create.uri, text: create.record.text, effectiveTimestamp}, "Indexing new post")
 
         return {
           uri: create.uri,
