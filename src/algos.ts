@@ -61,11 +61,11 @@ function createLanguageFeed(
       .orderBy('cid', 'desc')
       .limit(params.limit);
 
-    if (Array.isArray(ctx.cfg.FILTERED_USERS)) {
-      logger.info("Constant filtered users - " + FILTERED_USERS);
-      logger.info("Config filtered users - " + ctx.cfg.FILTERED_USERS.join(','));
-      builder = builder.where('author', 'not in', ctx.cfg.FILTERED_USERS);
-    }
+    // if (Array.isArray(ctx.cfg.FILTERED_USERS)) {
+    //   logger.info("Constant filtered users - " + FILTERED_USERS);
+    //   logger.info("Config filtered users - " + ctx.cfg.FILTERED_USERS.join(','));
+    //   builder = builder.where('author', 'not in', ctx.cfg.FILTERED_USERS);
+    // }
 
     if (includeReplies) {
       if (actor) {
