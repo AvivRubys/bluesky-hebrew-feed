@@ -13,6 +13,7 @@ import {
 import { Database } from '../db';
 import logger from '../logger';
 import { sql } from 'kysely';
+import { ValidationError } from '@atproto/lexicon';
 
 const commits_handled = new Counter({
   name: 'indexer_commits_handled',
@@ -46,7 +47,9 @@ export abstract class FirehoseSubscriptionBase {
             value,
           );
         } catch (err) {
-          console.error('repo subscription skipped invalid message', err);
+          if (!(err instanceof ValidationError && err.message === 'Message must have the property "blocks"')) {
+            console.error('repo subscription skipped invalid message', err);
+          }
         }
       },
     });
