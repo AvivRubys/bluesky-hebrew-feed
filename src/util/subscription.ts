@@ -12,7 +12,6 @@ import {
 } from '../lexicon/types/com/atproto/sync/subscribeRepos';
 import { Database } from '../db';
 import logger from '../logger';
-import { sql } from 'kysely';
 import { ValidationError } from '@atproto/lexicon';
 
 const commits_handled = new Counter({
@@ -40,6 +39,9 @@ export abstract class FirehoseSubscriptionBase {
       service: service,
       method: ids.ComAtprotoSyncSubscribeRepos,
       getParams: () => this.getCursor(),
+      onReconnectError: (error: unknown, n: number, initialSetup: boolean) => {
+        console.error('onReconnectError', error, n, initialSetup);
+      },
       validate: (value: unknown) => {
         try {
           return lexicons.assertValidXrpcMessage<RepoEvent>(
@@ -47,7 +49,12 @@ export abstract class FirehoseSubscriptionBase {
             value,
           );
         } catch (err) {
-          if (!(err instanceof ValidationError && err.message === 'Message must have the property "blocks"')) {
+          if (
+            !(
+              err instanceof ValidationError &&
+              err.message === 'Message must have the property "blocks"'
+            )
+          ) {
             console.error('repo subscription skipped invalid message', err);
           }
         }
