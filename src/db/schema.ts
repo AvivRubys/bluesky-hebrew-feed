@@ -4,6 +4,7 @@ export type DatabaseSchema = {
   post: PostSchema;
   sub_state: SubStateSchema;
   notified_users: NotifiedUsersSchema;
+  filtered_users: FilteredUsersSchema;
 };
 
 export type PostSchema = {
@@ -16,6 +17,10 @@ export type PostSchema = {
   replyRoot?: string;
   replyTo?: string;
   language: string;
+};
+
+export type FilteredUsersSchema = {
+  did: string;
 };
 
 export type SubStateSchema = {

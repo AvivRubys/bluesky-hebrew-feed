@@ -56,6 +56,9 @@ function createLanguageFeed(
       .selectFrom('post')
       .select(['effectiveTimestamp', 'uri'])
       .where('language', 'in', languages)
+      // .where('author', 'not in', (qb) =>
+      //   qb.selectFrom(['filtered_users']).select('did'),
+      // )
       .where('author', 'not in', FILTERED_USERS)
       .orderBy('effectiveTimestamp', 'desc')
       .orderBy('cid', 'desc')

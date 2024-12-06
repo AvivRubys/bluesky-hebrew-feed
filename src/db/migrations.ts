@@ -17,6 +17,7 @@ export const migrationProvider: MigrationProvider = {
       '012': addEffectiveTimestampToPost,
       '013': optimizeIndexes2,
       '014': addRecommendedIndexes,
+      '015': addFilteredUsers,
     };
   },
 };
@@ -211,6 +212,15 @@ const addRecommendedIndexes = {
       .on('post')
       .columns(['author', 'uri'])
       .using('btree')
+      .execute();
+  },
+};
+
+const addFilteredUsers = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createTable('filtered_users')
+      .addColumn('did', 'varchar', (col) => col.notNull().primaryKey())
       .execute();
   },
 };
