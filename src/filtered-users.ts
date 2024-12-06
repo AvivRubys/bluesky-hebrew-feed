@@ -3,11 +3,12 @@ import logger from './logger';
 import { Config } from './config';
 import { Database } from './db';
 import { interval } from 'ix/asynciterable';
+import { secondsToMilliseconds } from 'date-fns';
 
 const FILTERED_USERS_BY_REQUEST_POST =
   'at://did:plc:ioo5uzicjxs5i6nfpjcxbugg/app.bsky.feed.post/3lbf7z7lb6c2x';
 
-const UPDATE_INTERVAL_MINUTES = 30;
+const UPDATE_INTERVAL_MINUTES = secondsToMilliseconds(30);
 
 export async function filteredUsersUpdater(bsky: AtpAgent, db: Database) {
   logger.info('Starting filtered users updater');
