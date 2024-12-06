@@ -25,11 +25,14 @@ async function updateFilteredUsers(bsky: AtpAgent, db: Database) {
   const users = await fetchFilteredUsers(bsky);
   logger.info({ users }, 'Fetched filtered users');
 
-  await db
-    .insertInto('filtered_users')
-    .values(users.map((did) => ({ did })))
-    .onConflict((oc) => oc.doNothing())
-    .execute();
+  await db.transaction().execute(async (tx) => {
+    await tx.deleteFrom('filtered_users').execute();
+
+    await tx
+      .insertInto('filtered_users')
+      .values(users.map((did) => ({ did })))
+      .execute();
+  });
 }
 
 async function fetchFilteredUsers(bsky: AtpAgent): Promise<readonly string[]> {
