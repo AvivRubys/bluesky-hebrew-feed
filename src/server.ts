@@ -6,6 +6,7 @@ import { FirehoseSubscription } from './subscription';
 import { Config } from './config';
 import { createApi } from './api';
 import { runNotifyBot } from './notify-bot';
+import { filteredUsersUpdater } from './filtered-users';
 
 export async function runFeedGenerator(cfg: Config): Promise<void> {
   // Create
@@ -37,5 +38,7 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
   void firehose.run(cfg.SUBSCRIPTION_RECONNECT_DELAY);
   const server = app.listen(cfg.PORT, cfg.HOST);
   runNotifyBot(ctx);
+  filteredUsersUpdater(bsky, db);
+
   await events.once(server, 'listening');
 }
