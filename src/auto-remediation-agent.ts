@@ -7,7 +7,7 @@ const execAsync = util.promisify(exec);
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ?? '8080';
 const checkInterval = 30_000;
-const restartGracePeriod = 120_000;
+const restartGracePeriod = 300_000;
 
 type Logger = typeof console.log;
 const addTimestamp =
