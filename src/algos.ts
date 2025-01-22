@@ -8,7 +8,6 @@ import {
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { PostSchema } from './db/schema';
 import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
-import { FILTERED_USERS } from './util/userlists';
 import { AppContext } from './context';
 import logger from './logger';
 
@@ -59,14 +58,9 @@ function createLanguageFeed(
       .where('author', 'not in', (qb) =>
         qb.selectFrom('filtered_users').select('did'),
       )
-      .where('author', 'not in', FILTERED_USERS)
       .orderBy('effectiveTimestamp', 'desc')
       .orderBy('cid', 'desc')
       .limit(params.limit);
-
-    if (Array.isArray(ctx.cfg.FILTERED_USERS)) {
-      builder = builder.where('author', 'not in', ctx.cfg.FILTERED_USERS);
-    }
 
     if (includeReplies) {
       if (actor) {
@@ -108,7 +102,6 @@ async function firstHebrewPostsFeed(
         .select(['uri', 'effectiveTimestamp'])
         .where('language', 'in', LANGS_HEBREW)
         .where('post.replyTo', 'is', null)
-        .where('author', 'not in', FILTERED_USERS)
         .orderBy('author')
         .orderBy('effectiveTimestamp', 'asc'),
     )
