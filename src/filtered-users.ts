@@ -33,24 +33,27 @@ async function updateFilteredUsers(bsky: AtpAgent, db: Database) {
 
   const selfFilteredUsers = await fetchSelfFilteredUsers(bsky);
   logger.info({ users: selfFilteredUsers }, 'Fetched self filtered users');
-  users.concat(selfFilteredUsers);
+  users.push(...selfFilteredUsers);
 
   for (const filterList of FILTERED_USERS_LISTS) {
     const filteredUsers = await fetchFilteredUsersList(bsky, filterList);
     logger.info({ users, filterList }, 'Fetched filtered users from list');
-    users.concat(filteredUsers);
+    users.push(...filteredUsers);
   }
 
   const uniqueUsers = [...new Set(users)];
 
-  await db.transaction().execute(async (tx) => {
-    await tx.deleteFrom('filtered_users').execute();
+  if (uniqueUsers.length > 0) {
+    await db.transaction().execute(async (tx) => {
+      await tx.deleteFrom('filtered_users').execute();
 
-    await tx
-      .insertInto('filtered_users')
-      .values(uniqueUsers.map((did) => ({ did })))
-      .execute();
-  });
+      await tx
+        .insertInto('filtered_users')
+        .values(uniqueUsers.map((did) => ({ did })))
+        .onConflict((oc) => oc.doNothing())
+        .execute();
+    });
+  }
 
   logger.info('Finished updating filtered users');
 }
