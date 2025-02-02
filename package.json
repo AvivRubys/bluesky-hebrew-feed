@@ -17,7 +17,7 @@
     "@atproto/lexicon": "^0.4.1",
     "@atproto/repo": "^0.4.3",
     "@atproto/syntax": "^0.3.0",
-    "@atproto/xrpc-server": "^0.6.3",
+    "@atproto/xrpc-server": "^0.7.9",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
