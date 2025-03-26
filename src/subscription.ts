@@ -56,7 +56,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 function removeFacets(record: PostRecord) {
   const richText = new RichText({
     text: record.text,
-    facets: record.facets as any,
+    facets: record.facets,
     entities: record.entities,
   });
 
