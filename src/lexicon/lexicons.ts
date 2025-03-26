@@ -3182,19 +3182,20 @@ export const schemaDict = {
       },
     },
   },
-  ComAtprotoSyncSubscribeRepos: {
+  ComAtprotoSyncSubscribeRepos:  {
     lexicon: 1,
     id: 'com.atproto.sync.subscribeRepos',
     defs: {
       main: {
         type: 'subscription',
-        description: 'Subscribe to repo updates',
+        description:
+          'Repository event stream, aka Firehose endpoint. Outputs repo commits with diff data, and identity update events, for all repositories on the current server. See the atproto specifications for details around stream sequencing, repo versioning, CAR diff format, and more. Public and does not require auth; implemented by PDS and Relay.',
         parameters: {
           type: 'params',
           properties: {
             cursor: {
               type: 'integer',
-              description: 'The last known event to backfill from.',
+              description: 'The last known event seq number to backfill from.',
             },
           },
         },
@@ -3203,9 +3204,9 @@ export const schemaDict = {
             type: 'union',
             refs: [
               'lex:com.atproto.sync.subscribeRepos#commit',
-              'lex:com.atproto.sync.subscribeRepos#handle',
-              'lex:com.atproto.sync.subscribeRepos#migrate',
-              'lex:com.atproto.sync.subscribeRepos#tombstone',
+              'lex:com.atproto.sync.subscribeRepos#sync',
+              'lex:com.atproto.sync.subscribeRepos#identity',
+              'lex:com.atproto.sync.subscribeRepos#account',
               'lex:com.atproto.sync.subscribeRepos#info',
             ],
           },
@@ -3214,53 +3215,80 @@ export const schemaDict = {
           {
             name: 'FutureCursor',
           },
+          {
+            name: 'ConsumerTooSlow',
+            description:
+              'If the consumer of the stream can not keep up with events, and a backlog gets too large, the server will drop the connection.',
+          },
         ],
       },
       commit: {
         type: 'object',
+        description:
+          'Represents an update of repository state. Note that empty commits are allowed, which include no repo data changes, but an update to rev and signature.',
         required: [
           'seq',
           'rebase',
           'tooBig',
           'repo',
           'commit',
-          'prev',
+          'rev',
+          'since',
           'blocks',
           'ops',
           'blobs',
           'time',
         ],
-        nullable: ['prev'],
+        nullable: ['since'],
         properties: {
           seq: {
             type: 'integer',
+            description: 'The stream sequence number of this message.',
           },
           rebase: {
             type: 'boolean',
+            description: 'DEPRECATED -- unused',
           },
           tooBig: {
             type: 'boolean',
+            description:
+              'DEPRECATED -- replaced by #sync event and data limits. Indicates that this commit contained too many ops, or data size was too large. Consumers will need to make a separate request to get missing data.',
           },
           repo: {
             type: 'string',
             format: 'did',
+            description:
+              "The repo this event comes from. Note that all other message types name this field 'did'.",
           },
           commit: {
             type: 'cid-link',
+            description: 'Repo commit object CID.',
           },
-          prev: {
-            type: 'cid-link',
+          rev: {
+            type: 'string',
+            format: 'tid',
+            description:
+              'The rev of the emitted commit. Note that this information is also in the commit object included in blocks, unless this is a tooBig event.',
+          },
+          since: {
+            type: 'string',
+            format: 'tid',
+            description:
+              'The rev of the last emitted commit from this repo (if any).',
           },
           blocks: {
             type: 'bytes',
-            description: 'CAR file containing relevant blocks',
-            maxLength: 1000000,
+            description:
+              "CAR file containing relevant blocks, as a diff since the previous repo state. The commit must be included as a block, and the commit block CID must be the first entry in the CAR header 'roots' list.",
+            maxLength: 2000000,
           },
           ops: {
             type: 'array',
             items: {
               type: 'ref',
               ref: 'lex:com.atproto.sync.subscribeRepos#repoOp',
+              description:
+                'List of repo mutation operations in this commit (eg, records created, updated, or deleted).',
             },
             maxLength: 200,
           },
@@ -3268,58 +3296,62 @@ export const schemaDict = {
             type: 'array',
             items: {
               type: 'cid-link',
+              description:
+                'DEPRECATED -- will soon always be empty. List of new blobs (by CID) referenced by records in this commit.',
             },
           },
+          prevData: {
+            type: 'cid-link',
+            description:
+              "The root CID of the MST tree for the previous commit from this repo (indicated by the 'since' revision field in this message). Corresponds to the 'data' field in the repo commit object. NOTE: this field is effectively required for the 'inductive' version of firehose.",
+          },
           time: {
             type: 'string',
             format: 'datetime',
+            description:
+              'Timestamp of when this message was originally broadcast.',
           },
         },
       },
-      handle: {
+      sync: {
         type: 'object',
-        required: ['seq', 'did', 'handle', 'time'],
+        description:
+          'Updates the repo to a new state, without necessarily including that state on the firehose. Used to recover from broken commit streams, data loss incidents, or in situations where upstream host does not know recent state of the repository.',
+        required: ['seq', 'did', 'blocks', 'rev', 'time'],
         properties: {
           seq: {
             type: 'integer',
+            description: 'The stream sequence number of this message.',
           },
           did: {
             type: 'string',
             format: 'did',
+            description:
+              'The account this repo event corresponds to. Must match that in the commit object.',
           },
-          handle: {
+          blocks: {
+            type: 'bytes',
+            description:
+              "CAR file containing the commit, as a block. The CAR header must include the commit block CID as the first 'root'.",
+            maxLength: 10000,
+          },
+          rev: {
             type: 'string',
-            format: 'handle',
+            description:
+              'The rev of the commit. This value must match that in the commit object.',
           },
           time: {
             type: 'string',
             format: 'datetime',
+            description:
+              'Timestamp of when this message was originally broadcast.',
           },
         },
       },
-      migrate: {
+      identity: {
         type: 'object',
-        required: ['seq', 'did', 'migrateTo', 'time'],
-        nullable: ['migrateTo'],
-        properties: {
-          seq: {
-            type: 'integer',
-          },
-          did: {
-            type: 'string',
-            format: 'did',
-          },
-          migrateTo: {
-            type: 'string',
-          },
-          time: {
-            type: 'string',
-            format: 'datetime',
-          },
-        },
-      },
-      tombstone: {
-        type: 'object',
+        description:
+          "Represents a change to an account's identity. Could be an updated handle, signing key, or pds hosting endpoint. Serves as a prod to all downstream services to refresh their identity cache.",
         required: ['seq', 'did', 'time'],
         properties: {
           seq: {
@@ -3332,6 +3364,49 @@ export const schemaDict = {
           time: {
             type: 'string',
             format: 'datetime',
+          },
+          handle: {
+            type: 'string',
+            format: 'handle',
+            description:
+              "The current handle for the account, or 'handle.invalid' if validation fails. This field is optional, might have been validated or passed-through from an upstream source. Semantics and behaviors for PDS vs Relay may evolve in the future; see atproto specs for more details.",
+          },
+        },
+      },
+      account: {
+        type: 'object',
+        description:
+          "Represents a change to an account's status on a host (eg, PDS or Relay). The semantics of this event are that the status is at the host which emitted the event, not necessarily that at the currently active PDS. Eg, a Relay takedown would emit a takedown with active=false, even if the PDS is still active.",
+        required: ['seq', 'did', 'time', 'active'],
+        properties: {
+          seq: {
+            type: 'integer',
+          },
+          did: {
+            type: 'string',
+            format: 'did',
+          },
+          time: {
+            type: 'string',
+            format: 'datetime',
+          },
+          active: {
+            type: 'boolean',
+            description:
+              'Indicates that the account has a repository which can be fetched from the host that emitted this event.',
+          },
+          status: {
+            type: 'string',
+            description:
+              'If active=false, this optional field indicates a reason for why the account is not active.',
+            knownValues: [
+              'takendown',
+              'suspended',
+              'deleted',
+              'deactivated',
+              'desynchronized',
+              'throttled',
+            ],
           },
         },
       },
@@ -3350,6 +3425,7 @@ export const schemaDict = {
       },
       repoOp: {
         type: 'object',
+        description: 'A repo operation, ie a mutation of a single record.',
         required: ['action', 'path', 'cid'],
         nullable: ['cid'],
         properties: {
@@ -3362,6 +3438,13 @@ export const schemaDict = {
           },
           cid: {
             type: 'cid-link',
+            description:
+              'For creates and updates, the new record CID. For deletions, null.',
+          },
+          prev: {
+            type: 'cid-link',
+            description:
+              'For updates and deletes, the previous record CID (required for inductive firehose). For creations, field should not be defined.',
           },
         },
       },
