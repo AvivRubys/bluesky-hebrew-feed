@@ -40,8 +40,8 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
       password: cfg.BLUESKY_CLIENT_LOGIN_PASSWORD,
     });
     void runNotifyBot(ctx);
+    void filteredUsersUpdater(bsky, db);
   }
-  void filteredUsersUpdater(bsky, db);
 
   await events.once(server, 'listening');
 }
