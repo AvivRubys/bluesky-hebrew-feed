@@ -1,5 +1,5 @@
 import { AsyncIterable } from 'ix';
-import { RichText } from '@atproto/api';
+import { Facet, RichText } from '@atproto/api';
 import { Counter } from 'prom-client';
 import { Commit } from './lexicon/types/com/atproto/sync/subscribeRepos';
 import { FirehoseSubscriptionBase } from './util/subscription';
@@ -56,7 +56,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 function removeFacets(record: PostRecord) {
   const richText = new RichText({
     text: record.text,
-    facets: record.facets,
+    facets: record.facets as Facet[],
     entities: record.entities,
   });
 
