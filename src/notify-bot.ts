@@ -7,7 +7,11 @@ import { RichText } from '@atproto/api';
 
 export async function runNotifyBot(ctx: AppContext) {
   for await (const _ of interval(ctx.cfg.BOT_RUN_INTERVAL_MS)) {
-    await notifyNewPosters(ctx);
+    try {
+      await notifyNewPosters(ctx);
+    } catch (err: unknown) {
+      logger.error({ err }, 'Notify bot iteration failed');
+    }
   }
 }
 
@@ -39,13 +43,13 @@ async function notifyNewPosters(ctx: AppContext) {
     .execute();
 
   for (const row of newUnnotifiedUsers) {
-    const resolvedHandle = await ctx.bsky.getProfile({ actor: row.author });
-    const rt = new RichText({
-      text: `היי @${resolvedHandle.data.handle}, נראה שפרסמת את הפוסט הראשון שלך בעברית!\nחסר לך אחרי מי לעקוב? לא יודע/ת איפה כולם? נסה/י את פיד עברית!`,
-    });
-    await rt.detectFacets(ctx.bsky);
+      const resolvedHandle = await ctx.bsky.getProfile({ actor: row.author });
+      const rt = new RichText({
+        text: `היי @${resolvedHandle.data.handle}, נראה שפרסמת את הפוסט הראשון שלך בעברית!\nחסר לך אחרי מי לעקוב? לא יודע/ת איפה כולם? נסה/י את פיד עברית!`,
+      });
+      await rt.detectFacets(ctx.bsky);
 
-    await ctx.bsky.post({
+      await ctx.bsky.post({
       text: rt.text,
       facets: rt.facets,
       langs: ['he', 'yi', 'iw'],
