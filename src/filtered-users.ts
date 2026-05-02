@@ -36,9 +36,13 @@ async function updateFilteredUsers(bsky: AtpAgent, db: Database) {
   users.push(...selfFilteredUsers);
 
   for (const filterList of FILTERED_USERS_LISTS) {
-    const filteredUsers = await fetchFilteredUsersList(bsky, filterList);
-    logger.info({ users, filterList }, 'Fetched filtered users from list');
-    users.push(...filteredUsers);
+    try {
+      const filteredUsers = await fetchFilteredUsersList(bsky, filterList);
+      logger.info({ users: filteredUsers, filterList }, 'Fetched filtered users from list');
+      users.push(...filteredUsers);
+    } catch (err: unknown) {
+      logger.error({ err, filterList }, 'Failed fetching filtered users from list');
+    }
   }
 
   const uniqueUsers = [...new Set(users)];
