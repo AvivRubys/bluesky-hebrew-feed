@@ -87,6 +87,7 @@ async function fetchFilteredUsersList(
   do {
     const response = await bsky.app.bsky.graph.getList({
       list,
+      cursor,
     });
     users.push(...response.data.items.map((item) => item.subject.did));
     cursor = response.data.cursor;
