@@ -32,13 +32,18 @@
           fetchUrl.searchParams.set('repo', repo);
           fetchUrl.searchParams.set('rkey', rkey);
 
-          const [post, handle] = await Promise.all([
-            fetch(fetchUrl).then(r => r.json()),
-            getDisplayName(repo)
-          ])
-          return {author: handle.replace('at://', ''), text: post.value.text};
+          try {
+            const [post, handle] = await Promise.all([
+              fetch(fetchUrl).then(r => r.json()),
+              getDisplayName(repo)
+            ])
+            if (!post.value) return null;
+            return {author: handle.replace('at://', ''), text: post.value.text};
+          } catch {
+            return null;
+          }
         }));
-        return posts;
+        return posts.filter(p => p !== null);
       }
 
       function createPost(handle, postText) {
