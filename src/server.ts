@@ -7,6 +7,7 @@ import { Config } from './config';
 import { createApi } from './api';
 import { runNotifyBot } from './notify-bot';
 import { filteredUsersUpdater } from './filtered-users';
+import { startHealthWatchdog } from './health-watchdog';
 
 export async function runFeedGenerator(cfg: Config): Promise<void> {
   // Create
@@ -44,4 +45,5 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
   }
 
   await events.once(server, 'listening');
+  startHealthWatchdog(db, firehose);
 }

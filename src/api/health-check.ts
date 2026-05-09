@@ -11,7 +11,7 @@ export function createHealthCheckRoute(
 ) {
   return async (_: Request, res: Response) => {
     try {
-      await Promise.all([databaseCheck(db), firehoseCheck(firehose)]);
+      await Promise.all([checkDatabase(db), checkFirehose(firehose)]);
       res.status(200).send();
     } catch (err) {
       logger.warn(err, 'Health check failed');
@@ -20,7 +20,7 @@ export function createHealthCheckRoute(
   };
 }
 
-async function databaseCheck(db: Database) {
+export async function checkDatabase(db: Database) {
   const result = await sql`SELECT 1`.execute(db);
 
   if (result.rows.length !== 1) {
@@ -30,7 +30,7 @@ async function databaseCheck(db: Database) {
     );
   }
 }
-async function firehoseCheck(firehose: FirehoseSubscription) {
+export async function checkFirehose(firehose: FirehoseSubscription) {
   if (typeof firehose.lastEventDate === 'undefined') {
     throw new Error(
       "Firehose health check failed - firehose hasn't started yet.",
