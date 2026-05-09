@@ -1,4 +1,4 @@
-import { Kysely, MigrationProvider } from 'kysely';
+import { Kysely, MigrationProvider, sql } from 'kysely';
 
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
@@ -28,7 +28,7 @@ export const migrationProvider: MigrationProvider = {
             .createTable('notified_users')
             .addColumn('did', 'varchar', (col) => col.primaryKey())
             .addColumn('notifiedAt', 'varchar', (col) =>
-              col.notNull().defaultTo('CURRENT_TIMESTAMP'),
+              col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`),
             )
             .execute();
 
