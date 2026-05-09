@@ -51,20 +51,46 @@
         return template.content.firstChild;
       }
 
-      async function insertFeed(feedName) {
-        const feed = await getFeed(feedName);
-        const elements = feed.map(e => createPost(e.author, e.text));
-        elements.at(-1).style.borderBottomWidth = '0px';
+      function selectFeed(feedName) {
+        if (feedName) {
+          history.replaceState(null, '', '?feedName=' + feedName);
+          loadFeed();
+        }
+      }
 
+      async function loadFeed() {
+        const params = new URLSearchParams(window.location.search);
+        const feedName = params.get('feedName');
+        if (!feedName) return;
+        const feed = await getFeed(feedName);
         const main = document.getElementById('posts');
         main.innerHTML = '';
+        if (!feed || feed.length === 0) {
+          main.innerHTML = '<p>No posts found in this feed.</p>';
+          return;
+        }
+        const elements = feed.map(e => createPost(e.author, e.text));
+        elements.at(-1).style.borderBottomWidth = '0px';
         main.append(...elements);
       }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const feedName = params.get('feedName');
+        if (feedName) {
+          const select = document.querySelector('select');
+          const option = select.querySelector(`option[value="${feedName}"]`);
+          if (option) {
+            option.selected = true;
+            loadFeed();
+          }
+        }
+      });
     </script>
   </head>
   <body>
     <label for="feed">Choose feed:</label><br />
-    <select onchange="javascript: insertFeed(this[selectedIndex].value)">
+    <select onchange="selectFeed(this[this.selectedIndex].value)">
       <option selected>-- Choose --</option>
       <option value="hebrew-feed-all">Hebrew All</option>
       <option value="hebrew-feed">Hebrew Posts</option>
