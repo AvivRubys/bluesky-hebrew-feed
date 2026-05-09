@@ -1,0 +1,17 @@
+.git
+.gitignore
+.dockerignore
+node_modules
+dist
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+!.env.docker.example
+caddy-data
+grafana-agent-data
+logs
+*.log
+coverage
+.vscode

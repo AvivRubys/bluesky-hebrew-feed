@@ -1,4 +1,3 @@
-import fs from 'fs';
 import Database from 'better-sqlite3';
 import { Kysely, Migrator, SqliteDialect } from 'kysely';
 import { Histogram } from 'prom-client';

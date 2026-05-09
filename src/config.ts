@@ -33,7 +33,7 @@ const envSchema = z.object({
   FEEDGEN_SUBSCRIPTION_ENDPOINT: z.string().default('wss://bsky.social'),
   FEEDGEN_HOSTNAME: z.string().default('example.com'),
   FEEDGEN_PUBLISHER_DID: z.string(),
-  SUBSCRIPTION_RECONNECT_DELAY: z.number().default(3000),
+  SUBSCRIPTION_RECONNECT_DELAY: z.coerce.number().default(3000),
   EXPERIMENT_FEED_SOURCE_FILEPATH: z.string().optional(),
 });
 

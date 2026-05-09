@@ -74,6 +74,4 @@ async function notifyNewPosters(ctx: AppContext) {
       .values({ did: row.author })
       .executeTakeFirst();
   }
-
-  console.log();
 }
