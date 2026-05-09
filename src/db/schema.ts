@@ -30,5 +30,5 @@ export type SubStateSchema = {
 
 export type NotifiedUsersSchema = {
   did: string;
-  notifiedAt: GeneratedAlways<Date>;
+  notifiedAt: GeneratedAlways<string>;
 };

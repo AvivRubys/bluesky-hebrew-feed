@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import { InvalidRequestError } from '@atproto/xrpc-server';
-import { Selectable, SelectQueryBuilder } from 'kysely';
+import { Selectable, SelectQueryBuilder, sql } from 'kysely';
 import { addYears } from 'date-fns';
 import {
   QueryParams,
@@ -98,15 +98,18 @@ async function firstHebrewPostsFeed(
     .with('first_posts', (eb) =>
       eb
         .selectFrom('post')
-        .distinctOn('author')
-        .select(['uri', 'effectiveTimestamp'])
+        .select(['uri', 'effectiveTimestamp', 'author'])
+        .select(
+          sql<number>`ROW_NUMBER() OVER (PARTITION BY author ORDER BY effectiveTimestamp ASC)`.as(
+            'rn',
+          ),
+        )
         .where('language', 'in', LANGS_HEBREW)
-        .where('post.replyTo', 'is', null)
-        .orderBy('author')
-        .orderBy('effectiveTimestamp', 'asc'),
+        .where('post.replyTo', 'is', null),
     )
     .selectFrom('first_posts')
     .selectAll()
+    .where('rn', '=', 1)
     .orderBy('effectiveTimestamp', 'desc')
     .limit(params.limit);
 

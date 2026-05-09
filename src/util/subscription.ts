@@ -40,7 +40,7 @@ export abstract class FirehoseSubscriptionBase {
       method: ids.ComAtprotoSyncSubscribeRepos,
       getParams: () => this.getCursor(),
       onReconnectError: (error: unknown, n: number, initialSetup: boolean) => {
-        console.error('onReconnectError', error, n, initialSetup);
+        logger.warn({ reconnectAttempt: n, initialSetup }, 'Firehose connection lost, reconnecting...');
       },
       validate: (value: unknown) => {
         try {
@@ -108,7 +108,7 @@ export abstract class FirehoseSubscriptionBase {
       .where('service', '=', this.service)
       .executeTakeFirst();
 
-    if (result.numUpdatedRows === 0n) {
+    if (Number(result.numUpdatedRows) === 0) {
       logger.info('Updating sub_state changed no rows, upserting instead');
 
       await this.db

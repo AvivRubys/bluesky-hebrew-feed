@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { Pool } from 'pg';
-import { Kysely, Migrator, PostgresDialect } from 'kysely';
+import Database from 'better-sqlite3';
+import { Kysely, Migrator, SqliteDialect } from 'kysely';
 import { Histogram } from 'prom-client';
 import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
@@ -12,19 +12,13 @@ const database_operation_duration = new Histogram({
   help: 'Duration of all database operations',
   labelNames: ['operation_type'],
 });
+
 export function createDb(cfg: Config): Database {
+  const sqlite = new Database(cfg.SQLITE_DATABASE_PATH);
+  sqlite.pragma('journal_mode = WAL');
+
   return new Kysely<DatabaseSchema>({
-    dialect: new PostgresDialect({
-      pool: new Pool({
-        connectionString: cfg.POSTGRES_CONNECTION_STRING,
-        ssl: cfg.POSTGRES_CA_CERT_FILEPATH
-          ? {
-              rejectUnauthorized: true,
-              ca: fs.readFileSync(cfg.POSTGRES_CA_CERT_FILEPATH),
-            }
-          : true,
-      }),
-    }),
+    dialect: new SqliteDialect({ database: sqlite }),
     plugins: [createMonitoringPlugin(database_operation_duration)],
   });
 }

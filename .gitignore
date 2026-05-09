@@ -1,4 +1,4 @@
-bluesky.db*
+*.db*
 .vscode/*
 
 # Logs

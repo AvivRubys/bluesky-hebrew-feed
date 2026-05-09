@@ -14,8 +14,7 @@ const envSchema = z.object({
   HOST: z.string().default('localhost'),
 
   // DB
-  POSTGRES_CONNECTION_STRING: z.string(),
-  POSTGRES_CA_CERT_FILEPATH: z.string().optional(),
+  SQLITE_DATABASE_PATH: z.string().default('./feed.db'),
   CACHE_TTL_MS: z.coerce.number().default(minutesToMilliseconds(30)),
 
   // Notifier bot
