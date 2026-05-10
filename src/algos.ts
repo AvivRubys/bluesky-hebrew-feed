@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+
 import { InvalidRequestError } from '@atproto/xrpc-server';
 import { Selectable, SelectQueryBuilder, sql } from 'kysely';
 import { addYears } from 'date-fns';
@@ -9,7 +9,7 @@ import {
 import { PostSchema } from './db/schema';
 import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
 import { AppContext } from './context';
-import logger from './logger';
+
 
 type Post = Selectable<PostSchema>;
 
@@ -118,21 +118,6 @@ async function firstHebrewPostsFeed(
   return renderFeed(await builder.execute());
 }
 
-async function experimentsFeed(ctx: AppContext, params: QueryParams) {
-  if (!ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH) {
-    return { feed: [] };
-  }
-
-  try {
-    const file = await fs.readFile(ctx.cfg.EXPERIMENT_FEED_SOURCE_FILEPATH);
-    const contents = file.toString();
-    return JSON.parse(contents) as AlgoOutput;
-  } catch (err) {
-    logger.error(err, 'Error rendering experimental feed');
-    return { feed: [] };
-  }
-}
-
 function oneYearAgo(feedGenerator: AlgoHandler) {
   return async (ctx: AppContext, params: QueryParams, actor?: string) => {
     if (params.cursor) {
@@ -160,7 +145,6 @@ const algos: Record<string, AlgoHandler> = {
   'hebrew-milifney': oneYearAgo(createLanguageFeed(LANGS_HEBREW, true)),
   'hebrew-feed': createLanguageFeed(LANGS_HEBREW, false),
   'hebrew-noobs': firstHebrewPostsFeed,
-  'experiment-feed': experimentsFeed,
 };
 
 export default algos;
