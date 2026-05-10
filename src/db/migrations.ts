@@ -3,6 +3,41 @@ import { Kysely, MigrationProvider, sql } from 'kysely';
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
     return {
+      '006_add_language_timestamp_index': {
+        async up(db: Kysely<unknown>) {
+          await db.schema
+            .createIndex('post_language_timestamp_index')
+            .on('post')
+            .columns(['language', 'timestamp desc'])
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema
+            .dropIndex('post_language_timestamp_index')
+            .ifExists()
+            .execute();
+        },
+      },
+      '007_optimize_feed_indexes': {
+        async up(db: Kysely<unknown>) {
+          await db.schema
+            .createIndex('post_lang_author_timestamp_idx')
+            .on('post')
+            .columns(['language', 'author', 'timestamp'])
+            .execute();
+
+          await db.schema
+            .createIndex('post_lang_author_ts_no_reply_idx')
+            .on('post')
+            .columns(['language', 'author', 'timestamp'])
+            .where(sql.ref('replyTo'), 'is', null)
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema.dropIndex('post_lang_author_timestamp_idx').ifExists().execute();
+          await db.schema.dropIndex('post_lang_author_ts_no_reply_idx').ifExists().execute();
+        },
+      },
       '005_drop_reply_root': {
         async up(db: Kysely<unknown>) {
           await db.schema
