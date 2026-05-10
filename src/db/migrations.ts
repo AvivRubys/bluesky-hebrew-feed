@@ -3,6 +3,60 @@ import { Kysely, MigrationProvider, sql } from 'kysely';
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
     return {
+      '005_drop_reply_root': {
+        async up(db: Kysely<unknown>) {
+          await db.schema
+            .alterTable('post')
+            .dropColumn('replyRoot')
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema
+            .alterTable('post')
+            .addColumn('replyRoot', 'varchar')
+            .execute();
+        },
+      },
+      '004_rename_effective_timestamp': {
+        async up(db: Kysely<unknown>) {
+          await db.schema
+            .alterTable('post')
+            .renameColumn('effectiveTimestamp', 'timestamp')
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema
+            .alterTable('post')
+            .renameColumn('timestamp', 'effectiveTimestamp')
+            .execute();
+        },
+      },
+      '003_drop_redundant_timestamps': {
+        async up(db: Kysely<unknown>) {
+          await sql`UPDATE post SET effectiveTimestamp = MIN(indexedAt, COALESCE(createdAt, indexedAt)) WHERE effectiveTimestamp != MIN(indexedAt, COALESCE(createdAt, indexedAt))`.execute(db);
+
+          await db.schema
+            .alterTable('post')
+            .dropColumn('indexedAt')
+            .execute();
+
+          await db.schema
+            .alterTable('post')
+            .dropColumn('createdAt')
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema
+            .alterTable('post')
+            .addColumn('createdAt', 'varchar')
+            .execute();
+
+          await db.schema
+            .alterTable('post')
+            .addColumn('indexedAt', 'varchar')
+            .execute();
+        },
+      },
       '002_optimize_indexes_remove_cid': {
         async up(db: Kysely<unknown>) {
           await db.schema
@@ -93,7 +147,6 @@ export const migrationProvider: MigrationProvider = {
             .addColumn('indexedAt', 'varchar', (col) => col.notNull())
             .addColumn('createdAt', 'varchar')
             .addColumn('effectiveTimestamp', 'varchar', (col) => col.notNull())
-            .addColumn('replyRoot', 'varchar')
             .addColumn('replyTo', 'varchar')
             .addColumn('language', 'varchar', (col) => col.notNull())
             .execute();

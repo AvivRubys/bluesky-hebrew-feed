@@ -26,9 +26,9 @@ async function notifyNewPosters(ctx: AppContext) {
     .with('first_posts', (eb) =>
       eb
         .selectFrom('post')
-        .select(['author', 'indexedAt'])
+        .select(['author', 'timestamp'])
         .select(
-          sql<number>`ROW_NUMBER() OVER (PARTITION BY author ORDER BY indexedAt ASC)`.as(
+          sql<number>`ROW_NUMBER() OVER (PARTITION BY author ORDER BY timestamp ASC)`.as(
             'rn',
           ),
         )
@@ -38,7 +38,7 @@ async function notifyNewPosters(ctx: AppContext) {
     .selectFrom('first_posts')
     .select('author')
     .where('rn', '=', 1)
-    .where('indexedAt', '>', startDate.toISOString())
+    .where('timestamp', '>', startDate.toISOString())
     .as('new_users');
 
   const newUnnotifiedUsers = await ctx.db
