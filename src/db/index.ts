@@ -1,5 +1,5 @@
-import Database from 'better-sqlite3';
-import { Kysely, Migrator, SqliteDialect } from 'kysely';
+import { LibsqlDialect } from '@libsql/kysely-libsql';
+import { Kysely, Migrator, sql } from 'kysely';
 import { Histogram } from 'prom-client';
 import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
@@ -12,14 +12,18 @@ const database_operation_duration = new Histogram({
   labelNames: ['operation_type'],
 });
 
-export function createDb(cfg: Config): Database {
-  const sqlite = new Database(cfg.SQLITE_DATABASE_PATH);
-  sqlite.pragma('journal_mode = WAL');
-
-  return new Kysely<DatabaseSchema>({
-    dialect: new SqliteDialect({ database: sqlite }),
+export async function createDb(cfg: Config): Promise<Database> {
+  const db = new Kysely<DatabaseSchema>({
+    dialect: new LibsqlDialect({ url: 'file:' + cfg.SQLITE_DATABASE_PATH }),
     plugins: [createMonitoringPlugin(database_operation_duration)],
   });
+
+  await sql`PRAGMA journal_mode = WAL`.execute(db);
+  await sql`PRAGMA synchronous = NORMAL`.execute(db);
+  await sql`PRAGMA busy_timeout = 5000`.execute(db);
+  await sql`PRAGMA cache_size = -64000`.execute(db);
+
+  return db;
 }
 
 export async function migrateToLatest(db: Database) {

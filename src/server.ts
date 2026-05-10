@@ -11,7 +11,7 @@ import { startHealthWatchdog } from './health-watchdog';
 
 export async function runFeedGenerator(cfg: Config): Promise<void> {
   // Create
-  const db = createDb(cfg);
+  const db = await createDb(cfg);
   const firehose = new FirehoseSubscription(
     db,
     cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,

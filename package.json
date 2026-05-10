@@ -18,6 +18,8 @@
     "@atproto/repo": "^0.4.3",
     "@atproto/syntax": "^0.3.0",
     "@atproto/xrpc-server": "^0.7.9",
+    "@libsql/client": "^0.17.3",
+    "@libsql/kysely-libsql": "^0.4.1",
     "better-sqlite3": "^11.0.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
