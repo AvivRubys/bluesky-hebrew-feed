@@ -16,6 +16,7 @@ export async function createDb(cfg: Config): Promise<Database> {
   const db = new Kysely<DatabaseSchema>({
     dialect: new LibsqlDialect({ url: 'file:' + cfg.SQLITE_DATABASE_PATH }),
     plugins: [createMonitoringPlugin(database_operation_duration)],
+    log: ['query', 'error']
   });
 
   await sql`PRAGMA journal_mode = WAL`.execute(db);
