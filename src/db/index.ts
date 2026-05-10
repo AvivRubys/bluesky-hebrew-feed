@@ -1,5 +1,5 @@
 import { LibsqlDialect } from '@libsql/kysely-libsql';
-import { Kysely, Migrator, sql } from 'kysely';
+import { Kysely, LogEvent, Migrator, sql } from 'kysely';
 import { Histogram } from 'prom-client';
 import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
@@ -16,7 +16,15 @@ export async function createDb(cfg: Config): Promise<Database> {
   const db = new Kysely<DatabaseSchema>({
     dialect: new LibsqlDialect({ url: 'file:' + cfg.SQLITE_DATABASE_PATH }),
     plugins: [createMonitoringPlugin(database_operation_duration)],
-    log: ['query', 'error']
+    log(event: LogEvent) {
+      if (event.level === 'error') return
+      if (event.query.query.kind === 'SelectQueryNode') {
+        console.log(`query: ${event.query.sql}`)
+        console.log(`query parameters: ${event.query.parameters}`)
+        console.log(`query duration: ${event.queryDurationMillis.toFixed(1)}ms`)
+        console.log()
+      }
+    }
   });
 
   await sql`PRAGMA journal_mode = WAL`.execute(db);
