@@ -21,8 +21,7 @@ interface PgDatabaseSchema {
     cid: string;
     indexedAt: string;
     createdAt: string | null;
-    effectiveTimestamp: string;
-    replyRoot: string | null;
+    effective_timestamp: string;
     replyTo: string | null;
     language: string;
   };
@@ -43,11 +42,7 @@ interface SqliteDatabaseSchema {
   post: {
     uri: string;
     author: string;
-    cid: string;
-    indexedAt: string;
-    createdAt: string | null;
-    effectiveTimestamp: string;
-    replyRoot: string | null;
+timestamp: string;
     replyTo: string | null;
     language: string;
   };
@@ -163,7 +158,7 @@ async function main() {
     console.log(`Total posts to migrate: ${totalCount.count}`);
 
     const batchSize = 10000;
-    const insertChunkSize = Math.floor(999 / 9);
+    const insertChunkSize = Math.floor(999 / 6);
     let migratedCount = 0;
     let lastUri = '';
 
@@ -186,15 +181,11 @@ async function main() {
           .insertInto('post')
             .values(
               c.map((post) => ({
-            uri: post.uri,
-            author: post.author,
-            cid: post.cid,
-            indexedAt: post.indexedAt,
-            createdAt: post.createdAt,
-            effectiveTimestamp: post.effectiveTimestamp,
-            replyRoot: post.replyRoot,
-            replyTo: post.replyTo,
-            language: post.language,
+                uri: post.uri,
+                author: post.author,
+                timestamp: post.effectiveTimestamp,
+                replyTo: post.replyTo,
+                language: post.language,
               })),
             )
             .onConflict((oc) => oc.doNothing())
@@ -212,17 +203,12 @@ async function main() {
     await sqliteDb.schema
       .createIndex('post_language_replyto_index')
       .on('post')
-      .columns(['language', 'replyTo'])
+      .columns(['language', 'replyTo', 'timestamp desc'])
       .execute();
     await sqliteDb.schema
       .createIndex('post_author_index')
       .on('post')
       .column('author')
-      .execute();
-    await sqliteDb.schema
-      .createIndex('post_effectivetimestamp_index')
-      .on('post')
-      .column('effectiveTimestamp')
       .execute();
     await sqliteDb.schema
       .createIndex('language_feed_index')
@@ -231,8 +217,7 @@ async function main() {
         'language',
         'author',
         'replyTo',
-        'effectiveTimestamp desc',
-        'cid desc',
+        'timestamp desc',
       ])
       .execute();
     await sqliteDb.schema
@@ -278,11 +263,7 @@ const migrationProvider: MigrationProvider = {
             .createTable('post')
             .addColumn('uri', 'varchar', (col) => col.primaryKey())
             .addColumn('author', 'varchar', (col) => col.notNull())
-            .addColumn('cid', 'varchar', (col) => col.notNull())
-            .addColumn('indexedAt', 'varchar', (col) => col.notNull())
-            .addColumn('createdAt', 'varchar')
-            .addColumn('effectiveTimestamp', 'varchar', (col) => col.notNull())
-            .addColumn('replyRoot', 'varchar')
+            .addColumn('timestamp', 'varchar', (col) => col.notNull())
             .addColumn('replyTo', 'varchar')
             .addColumn('language', 'varchar', (col) => col.notNull())
             .execute();
