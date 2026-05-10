@@ -1,5 +1,5 @@
-FROM node:22-alpine AS build
-RUN apk add --no-cache python3 make g++
+FROM node:22-slim AS build
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -9,7 +9,7 @@ COPY scripts/ ./scripts/
 RUN npm run build
 RUN npm prune --production
 
-FROM node:22-alpine
+FROM node:22-slim
 WORKDIR /app
 COPY --from=build /app/dist/ ./dist/
 COPY --from=build /app/node_modules/ ./node_modules/
