@@ -251,12 +251,12 @@ export const migrationProvider: MigrationProvider = {
       },
       '008_restore_postgres_indexes': {
         async up(db: Kysely<unknown>) {
-          await db.schema.dropIndex('language_feed_block_subquery_index').execute()
-          await db.schema.dropIndex('language_feed_index').execute()
-          await db.schema.dropIndex('post_author_index').execute()
-          await db.schema.dropIndex('post_lang_author_timestamp_idx').execute()
-          await db.schema.dropIndex('post_lang_author_ts_no_reply_idx').execute()
-          await db.schema.dropIndex('post_language_replyto_index').execute()
+          await db.schema.dropIndex('language_feed_block_subquery_index').ifExists().execute()
+          await db.schema.dropIndex('language_feed_index').ifExists().execute()
+          await db.schema.dropIndex('post_author_index').ifExists().execute()
+          await db.schema.dropIndex('post_lang_author_timestamp_idx').ifExists().execute()
+          await db.schema.dropIndex('post_lang_author_ts_no_reply_idx').ifExists().execute()
+          await db.schema.dropIndex('post_language_replyto_index').ifExists().execute()
 
           await db.schema
             .createIndex('language_feed_index')
@@ -267,30 +267,35 @@ export const migrationProvider: MigrationProvider = {
               'replyTo',
               'timestamp desc',
             ])
+            .ifNotExists()
             .execute();
 
           await db.schema
             .createIndex('language_feed_block_subquery_index')
             .on('post')
             .columns(['author', 'uri'])
+            .ifNotExists()
             .execute();
 
           await db.schema
             .createIndex('post_effectivetimestamp_index')
             .on('post')
             .column('timestamp')
+            .ifNotExists()
             .execute();
 
           await db.schema
             .createIndex('post_language_replyto_index')
             .on('post')
             .columns(['language', 'replyTo'])
+            .ifNotExists()
             .execute();
 
           await db.schema
             .createIndex('post_author_index')
             .on('post')
             .column('author')
+            .ifNotExists()
             .execute();
         },
       },
