@@ -47,6 +47,12 @@ export function createMonitoringPlugin(
         args.queryId,
         h.startTimer({ operation_type: nodeTypeToLabel(args.node.kind) }),
       );
+
+      if (args.node.kind === 'SelectQueryNode') {
+        console.log('Query start', args.queryId, args.node)
+      } else if (args.node.kind === 'InsertQueryNode') {
+        console.log('Insert start', args.node)
+      }
       return args.node;
     },
 
@@ -57,6 +63,8 @@ export function createMonitoringPlugin(
       if (endTimer) {
         endTimer();
       }
+
+      console.log('Query end', args.queryId)
 
       return args.result;
     },
