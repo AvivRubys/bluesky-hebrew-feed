@@ -182,6 +182,7 @@ export const migrationProvider: MigrationProvider = {
             .addColumn('indexedAt', 'varchar', (col) => col.notNull())
             .addColumn('createdAt', 'varchar')
             .addColumn('effectiveTimestamp', 'varchar', (col) => col.notNull())
+            .addColumn('replyRoot', 'varchar')
             .addColumn('replyTo', 'varchar')
             .addColumn('language', 'varchar', (col) => col.notNull())
             .execute();
@@ -246,6 +247,51 @@ export const migrationProvider: MigrationProvider = {
           await db.schema.dropTable('notified_users').ifExists().execute();
           await db.schema.dropTable('sub_state').ifExists().execute();
           await db.schema.dropTable('post').ifExists().execute();
+        },
+      },
+      '008_restore_postgres_indexes': {
+        async up(db: Kysely<unknown>) {
+          await db.schema.dropIndex('language_feed_block_subquery_index').execute()
+          await db.schema.dropIndex('language_feed_index').execute()
+          await db.schema.dropIndex('post_author_index').execute()
+          await db.schema.dropIndex('post_lang_author_timestamp_idx').execute()
+          await db.schema.dropIndex('post_lang_author_ts_no_reply_idx').execute()
+          await db.schema.dropIndex('post_language_replyto_index').execute()
+
+          await db.schema
+            .createIndex('language_feed_index')
+            .on('post')
+            .columns([
+              'language',
+              'author',
+              'replyTo',
+              'timestamp desc',
+            ])
+            .execute();
+
+          await db.schema
+            .createIndex('language_feed_block_subquery_index')
+            .on('post')
+            .columns(['author', 'uri'])
+            .execute();
+
+          await db.schema
+            .createIndex('post_effectivetimestamp_index')
+            .on('post')
+            .column('timestamp')
+            .execute();
+
+          await db.schema
+            .createIndex('post_language_replyto_index')
+            .on('post')
+            .columns(['language', 'replyTo'])
+            .execute();
+
+          await db.schema
+            .createIndex('post_author_index')
+            .on('post')
+            .column('author')
+            .execute();
         },
       },
     };
