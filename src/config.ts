@@ -17,12 +17,14 @@ const envSchema = z.object({
   SQLITE_DATABASE_PATH: z.string().default('./feed.db'),
   CACHE_TTL_MS: z.coerce.number().default(minutesToMilliseconds(30)),
 
-  // Notifier bot
+  // Cron jobs
   BOT_ENABLED: stringBooleanSchema.default(false),
   BOT_RUN_INTERVAL_MS: z.coerce.number().default(minutesToMilliseconds(2)),
   BOT_LOOKBACK_INTERVAL_MS: z.coerce
     .number()
     .default(minutesToMilliseconds(30)),
+
+  FILTERED_USERS_FETCHER: stringBooleanSchema.default(false),
 
   // API Client
   BLUESKY_API_ENDPOINT: z.string().default('https://bsky.social'),
