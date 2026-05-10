@@ -3,6 +3,86 @@ import { Kysely, MigrationProvider, sql } from 'kysely';
 export const migrationProvider: MigrationProvider = {
   async getMigrations() {
     return {
+      '002_optimize_indexes_remove_cid': {
+        async up(db: Kysely<unknown>) {
+          await db.schema
+            .dropIndex('post_effectivetimestamp_index')
+            .ifExists()
+            .execute();
+
+          await db.schema
+            .dropIndex('post_language_replyto_index')
+            .ifExists()
+            .execute();
+
+          await db.schema
+            .dropIndex('language_feed_index')
+            .ifExists()
+            .execute();
+
+          await db.schema
+            .alterTable('post')
+            .dropColumn('cid')
+            .execute();
+
+          await db.schema
+            .createIndex('post_language_replyto_index')
+            .on('post')
+            .columns(['language', 'replyTo', 'effectiveTimestamp desc'])
+            .execute();
+
+          await db.schema
+            .createIndex('language_feed_index')
+            .on('post')
+            .columns([
+              'language',
+              'author',
+              'replyTo',
+              'effectiveTimestamp desc',
+            ])
+            .execute();
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema
+            .dropIndex('post_language_replyto_index')
+            .ifExists()
+            .execute();
+
+          await db.schema
+            .dropIndex('language_feed_index')
+            .ifExists()
+            .execute();
+
+          await db.schema
+            .alterTable('post')
+            .addColumn('cid', 'varchar')
+            .execute();
+
+          await db.schema
+            .createIndex('post_language_replyto_index')
+            .on('post')
+            .columns(['language', 'replyTo'])
+            .execute();
+
+          await db.schema
+            .createIndex('post_effectivetimestamp_index')
+            .on('post')
+            .column('effectiveTimestamp')
+            .execute();
+
+          await db.schema
+            .createIndex('language_feed_index')
+            .on('post')
+            .columns([
+              'language',
+              'author',
+              'replyTo',
+              'effectiveTimestamp desc',
+              'cid desc',
+            ])
+            .execute();
+        },
+      },
       '001_init': {
         async up(db: Kysely<unknown>) {
           await db.schema
