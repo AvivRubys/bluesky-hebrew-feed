@@ -61,7 +61,6 @@ function createLanguageFeed(
       .orderBy('timestamp', 'desc')
       .limit(params.limit);
 
-    actor = actor || 'did:plc:63fijvrra4pxxj34obunxp6f';
     if (includeReplies) {
       if (actor) {
         const blocklist = await ctx.block.getBlocksFor(actor);
