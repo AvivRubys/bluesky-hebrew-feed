@@ -31,6 +31,7 @@ export async function createDb(cfg: Config): Promise<Database> {
   await sql`PRAGMA synchronous = NORMAL`.execute(db);
   await sql`PRAGMA busy_timeout = 5000`.execute(db);
   await sql`PRAGMA cache_size = -64000`.execute(db);
+  await sql`ANALYZE`.execute(db);
 
   return db;
 }

@@ -16,6 +16,7 @@ type Post = Selectable<PostSchema>;
 function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
   params: QueryParams,
+  column: string = 'timestamp',
 ) {
   if (!params.cursor) {
     return builder;
@@ -26,7 +27,7 @@ function addCursor<T>(
     throw new InvalidRequestError('malformed cursor');
   }
   const timeStr = new Date(parseInt(indexedAt, 10)).toISOString();
-  return builder.where('timestamp', '<=', timeStr);
+  return builder.where(column, '<=', timeStr);
 }
 
 function renderFeed(posts: Pick<Post, 'timestamp' | 'uri'>[]) {
@@ -53,12 +54,11 @@ function createLanguageFeed(
   return async (ctx: AppContext, params: QueryParams, actor?: string) => {
     let builder = ctx.db
       .selectFrom('post')
-      .select(['timestamp', 'uri'])
+      .select(['post.timestamp', 'post.uri'])
+      .leftJoin('filtered_users', 'filtered_users.did', 'post.author')
+      .where('filtered_users.did', 'is', null)
       .where('language', 'in', languages)
-      .where('author', 'not in', (qb) =>
-        qb.selectFrom('filtered_users').select('did'),
-      )
-      .orderBy('timestamp', 'desc')
+      .orderBy('post.timestamp', 'desc')
       .limit(params.limit);
 
     if (includeReplies) {
@@ -66,24 +66,30 @@ function createLanguageFeed(
         const blocklist = await ctx.block.getBlocksFor(actor);
 
         if (blocklist && blocklist.length > 0) {
-          builder = builder.where((eb) =>
-            eb.or([
-              eb('replyTo', 'is', null),
-              eb('replyTo', 'not in', (eb) =>
-                eb
+          builder = builder
+            .leftJoin(
+              (qb) =>
+                qb
                   .selectFrom('post')
                   .select('uri')
-                  .where('author', 'in', blocklist),
-              ),
-            ]),
-          );
+                  .where('author', 'in', blocklist)
+                  .as('blocked_replies'),
+              (join) =>
+                join.onRef('blocked_replies.uri', '=', 'post.replyTo'),
+            )
+            .where(({ eb, or }) =>
+              or([
+                eb('post.replyTo', 'is', null),
+                eb('blocked_replies.uri', 'is', null),
+              ]),
+            );
         }
       }
     } else {
       builder = builder.where('post.replyTo', 'is', null);
     }
 
-    builder = addCursor(builder, params);
+    builder = addCursor(builder, params, 'post.timestamp');
 
     return renderFeed(await builder.execute());
   };

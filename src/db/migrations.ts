@@ -249,6 +249,55 @@ export const migrationProvider: MigrationProvider = {
           await db.schema.dropTable('post').ifExists().execute();
         },
       },
+      '009_sqlite_optimize': {
+        async up(db: Kysely<unknown>) {
+          await db.schema.dropIndex('language_feed_index').ifExists().execute();
+          await db.schema.dropIndex('post_language_replyto_index').ifExists().execute();
+          await db.schema.dropIndex('post_effectivetimestamp_index').ifExists().execute();
+
+          await db.schema
+            .createIndex('post_feed_covering_idx')
+            .on('post')
+            .columns(['language', 'timestamp desc', 'uri'])
+            .execute();
+
+          await db.schema
+            .createIndex('post_first_post_idx')
+            .on('post')
+            .columns(['language', 'author', 'timestamp'])
+            .where(sql.ref('replyTo'), 'is', null)
+            .execute();
+
+          await sql`ANALYZE`.execute(db);
+        },
+        async down(db: Kysely<unknown>) {
+          await db.schema.dropIndex('post_feed_covering_idx').ifExists().execute();
+          await db.schema.dropIndex('post_first_post_idx').ifExists().execute();
+
+          await db.schema
+            .createIndex('post_effectivetimestamp_index')
+            .on('post')
+            .column('timestamp')
+            .ifNotExists()
+            .execute();
+
+          await db.schema
+            .createIndex('post_language_replyto_index')
+            .on('post')
+            .columns(['language', 'replyTo'])
+            .ifNotExists()
+            .execute();
+
+          await db.schema
+            .createIndex('language_feed_index')
+            .on('post')
+            .columns(['language', 'author', 'replyTo', 'timestamp desc'])
+            .ifNotExists()
+            .execute();
+
+          await sql`ANALYZE`.execute(db);
+        },
+      },
       '008_restore_postgres_indexes': {
         async up(db: Kysely<unknown>) {
           await db.schema.dropIndex('language_feed_block_subquery_index').ifExists().execute()
