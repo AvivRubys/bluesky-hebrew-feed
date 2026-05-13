@@ -55,8 +55,15 @@ function createLanguageFeed(
     let builder = ctx.db
       .selectFrom('post')
       .select(['post.timestamp', 'post.uri'])
-      .leftJoin('filtered_users', 'filtered_users.did', 'post.author')
-      .where('filtered_users.did', 'is', null)
+      .where(({ not, exists, selectFrom }) =>
+        not(
+          exists(
+            selectFrom('filtered_users')
+              .selectAll()
+              .whereRef('filtered_users.did', '=', 'post.author'),
+          ),
+        ),
+      )
       .where('language', 'in', languages)
       .orderBy('post.timestamp', 'desc')
       .limit(params.limit);
@@ -66,23 +73,21 @@ function createLanguageFeed(
         const blocklist = await ctx.block.getBlocksFor(actor);
 
         if (blocklist && blocklist.length > 0) {
-          builder = builder
-            .leftJoin(
-              (qb) =>
-                qb
-                  .selectFrom('post')
-                  .select('uri')
-                  .where('author', 'in', blocklist)
-                  .as('blocked_replies'),
-              (join) =>
-                join.onRef('blocked_replies.uri', '=', 'post.replyTo'),
-            )
-            .where(({ eb, or }) =>
+          const blockedUris = await ctx.db
+            .selectFrom('post')
+            .select('uri')
+            .where('author', 'in', blocklist)
+            .execute();
+
+          if (blockedUris.length > 0) {
+            const uris = blockedUris.map((r) => r.uri);
+            builder = builder.where(({ eb, or }) =>
               or([
                 eb('post.replyTo', 'is', null),
-                eb('blocked_replies.uri', 'is', null),
+                eb('post.replyTo', 'not in', uris),
               ]),
             );
+          }
         }
       }
     } else {
