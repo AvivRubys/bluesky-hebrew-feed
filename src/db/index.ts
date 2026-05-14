@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Pool } from 'pg';
 import { Kysely, Migrator, PostgresDialect } from 'kysely';
 import { Histogram } from 'prom-client';

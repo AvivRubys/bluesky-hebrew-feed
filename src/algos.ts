@@ -3,6 +3,7 @@ import { Selectable, SelectQueryBuilder } from 'kysely';
 import { addYears } from 'date-fns';
 import {
   QueryParams,
+  OutputSchema as AlgoOutput,
 } from './lexicon/types/app/bsky/feed/getFeedSkeleton';
 import { PostSchema } from './db/schema';
 import { LANGS_HEBREW, LANGS_YIDDISH } from './util/hebrew';
