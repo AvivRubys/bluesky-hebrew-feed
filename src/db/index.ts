@@ -22,7 +22,7 @@ export function createDb(cfg: Config): Database {
               rejectUnauthorized: true,
               ca: fs.readFileSync(cfg.POSTGRES_CA_CERT_FILEPATH),
             }
-          : true,
+          : false,
       }),
     }),
     plugins: [createMonitoringPlugin(database_operation_duration)],
