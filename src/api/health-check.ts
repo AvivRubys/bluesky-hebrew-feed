@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
-import { sql } from 'kysely';
-import { differenceInSeconds, formatDistanceToNow } from 'date-fns';
 import { Database } from '../db';
 import logger from '../logger';
 import { FirehoseSubscription } from '../subscription';
+import { checkHealth } from '../health-watchdog';
 
 export function createHealthCheckRoute(
   db: Database,
@@ -11,38 +10,11 @@ export function createHealthCheckRoute(
 ) {
   return async (_: Request, res: Response) => {
     try {
-      await Promise.all([checkDatabase(db), checkFirehose(firehose)]);
+      await checkHealth(db, firehose)
       res.status(200).send();
     } catch (err) {
       logger.warn(err, 'Health check failed');
       res.status(503).send();
     }
   };
-}
-
-export async function checkDatabase(db: Database) {
-  const result = await sql`SELECT 1`.execute(db);
-
-  if (result.rows.length !== 1) {
-    throw new Error(
-      'Database health check failed. Unexpected query response: ' +
-        JSON.stringify(result.rows),
-    );
-  }
-}
-export async function checkFirehose(firehose: FirehoseSubscription) {
-  if (typeof firehose.lastEventDate === 'undefined') {
-    throw new Error(
-      "Firehose health check failed - firehose hasn't started yet.",
-    );
-  }
-
-  if (differenceInSeconds(new Date(), firehose.lastEventDate) > 10) {
-    const diff = formatDistanceToNow(firehose.lastEventDate, {
-      addSuffix: true,
-    });
-    throw new Error(
-      `Firehose health check failed. Last event date is older than 10s (${diff})`,
-    );
-  }
 }
