@@ -34,10 +34,15 @@ export abstract class FirehoseSubscriptionBase {
   public sub: Subscription<RepoEvent>;
   public lastEventDate?: Date;
 
-  constructor(public db: Database, public service: string) {
+  constructor(
+    public db: Database,
+    public service: string,
+    private signal: AbortSignal,
+  ) {
     this.sub = new Subscription({
       service: service,
       method: ids.ComAtprotoSyncSubscribeRepos,
+      signal,
       getParams: () => this.getCursor(),
       onReconnectError: (error: unknown, n: number, initialSetup: boolean) => {
         console.error('onReconnectError', error, n, initialSetup);
@@ -93,9 +98,12 @@ export abstract class FirehoseSubscriptionBase {
 
   async run(subscriptionReconnectDelay: number) {
     for await (const _ of interval(subscriptionReconnectDelay)) {
+      if (this.signal.aborted) break;
+      
       try {
         await this.processSubscription();
       } catch (err) {
+        if (this.signal.aborted) break;
         logger.error(err, 'repo subscription errored');
       }
     }

@@ -8,13 +8,15 @@ import { createApi } from './api';
 import { runNotifyBot } from './notify-bot';
 import { filteredUsersUpdater } from './filtered-users';
 import { startHealthWatchdog } from './health-watchdog';
+import logger from './logger';
 
 export async function runFeedGenerator(cfg: Config): Promise<void> {
-  // Create
   const db = createDb(cfg);
+  const abortController = new AbortController();
   const firehose = new FirehoseSubscription(
     db,
     cfg.FEEDGEN_SUBSCRIPTION_ENDPOINT,
+    abortController.signal,
   );
   const bsky = new AtpAgent({ service: cfg.BLUESKY_API_ENDPOINT });
   const block = new BlockService(bsky, cfg);
@@ -29,7 +31,6 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
 
   const app = createApi(ctx);
 
-  // Run
   await migrateToLatest(db);
 
   void firehose.run(cfg.SUBSCRIPTION_RECONNECT_DELAY);
@@ -46,4 +47,19 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
 
   await events.once(server, 'listening');
   startHealthWatchdog(db, firehose);
+
+  const shutdown = async () => {
+    logger.info('Shutting down...');
+    server.close();
+    abortController.abort();
+    try {
+      await db.destroy();
+    } catch (err) {
+      logger.error(err, 'Error closing database');
+    }
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
