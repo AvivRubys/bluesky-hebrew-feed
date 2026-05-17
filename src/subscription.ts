@@ -22,17 +22,15 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .filter((op) => hasHebrewLetters(op.record.text))
       .map(async (create) => {
         const language = await extractTextLanguage(removeFacets(create.record));
-        const createdAt = create.record.createdAt;
-        const effectiveTimestamp = min([new Date(), createdAt]).toISOString();
-        logger.info({uri: create.uri, text: create.record.text, effectiveTimestamp}, "Indexing new post")
+        const timestamp = min([new Date(), create.record.createdAt]).toISOString();
+        logger.info({uri: create.uri, text: create.record.text, timestamp}, "Indexing new post")
 
         return {
           uri: create.uri,
           author: create.author,
           replyTo: create.record.reply?.parent.uri,
           replyRoot: create.record.reply?.root.uri,
-          createdAt: create.record.createdAt,
-          effectiveTimestamp,
+          timestamp,
           language,
         };
       })

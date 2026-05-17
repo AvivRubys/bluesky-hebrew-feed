@@ -20,6 +20,7 @@ export const migrationProvider: MigrationProvider = {
       '015': addFilteredUsers,
       '016': removeCid,
       '017': removeIndexedAt,
+      '018': removeCreatedAtRenameTimestamp,
     };
   },
 };
@@ -236,5 +237,12 @@ const removeCid = {
 const removeIndexedAt = {
   async up(db: Kysely<unknown>) {
     await db.schema.alterTable('post').dropColumn('indexedAt').execute()
+  },
+};
+
+const removeCreatedAtRenameTimestamp = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.alterTable('post').dropColumn('createdAt').execute()
+    await db.schema.alterTable('post').renameColumn('effectiveTimestamp', 'timestamp').execute()
   },
 };

@@ -10,8 +10,7 @@ export type DatabaseSchema = {
 export type PostSchema = {
   uri: string;
   author: string;
-  createdAt?: string;
-  effectiveTimestamp: Generated<string>;
+  timestamp: string;
   replyRoot?: string;
   replyTo?: string;
   language: string;

@@ -26,10 +26,10 @@ function addCursor<T>(
   }
 
   const timeStr = new Date(cursorNum).toISOString();
-  return builder.where('effectiveTimestamp', '<=', timeStr);
+  return builder.where('timestamp', '<=', timeStr);
 }
 
-function renderFeed(posts: Pick<Post, 'effectiveTimestamp' | 'uri'>[]) {
+function renderFeed(posts: Pick<Post, 'timestamp' | 'uri'>[]) {
   const feed = posts.map((row) => ({
     post: row.uri,
   }));
@@ -37,7 +37,7 @@ function renderFeed(posts: Pick<Post, 'effectiveTimestamp' | 'uri'>[]) {
   let cursor: string | undefined;
   const last = posts.at(-1);
   if (last) {
-    cursor = new Date(last.effectiveTimestamp).getTime().toString();
+    cursor = new Date(last.timestamp).getTime().toString();
   }
 
   return {
@@ -53,12 +53,12 @@ function createLanguageFeed(
   return async (ctx: AppContext, params: QueryParams, actor?: string) => {
     let builder = ctx.db
       .selectFrom('post')
-      .select(['effectiveTimestamp', 'uri'])
+      .select(['timestamp', 'uri'])
       .where('language', 'in', languages)
       .where('author', 'not in', (qb) =>
         qb.selectFrom('filtered_users').select('did'),
       )
-      .orderBy('effectiveTimestamp', 'desc')
+      .orderBy('timestamp', 'desc')
       .limit(params.limit);
 
     if (includeReplies) {
@@ -98,15 +98,15 @@ async function firstHebrewPostsFeed(
       eb
         .selectFrom('post')
         .distinctOn('author')
-        .select(['uri', 'effectiveTimestamp'])
+        .select(['uri', 'timestamp'])
         .where('language', 'in', LANGS_HEBREW)
         .where('post.replyTo', 'is', null)
         .orderBy('author')
-        .orderBy('effectiveTimestamp', 'asc'),
+        .orderBy('timestamp', 'asc'),
     )
     .selectFrom('first_posts')
     .selectAll()
-    .orderBy('effectiveTimestamp', 'desc')
+    .orderBy('timestamp', 'desc')
     .limit(params.limit);
 
   builder = addCursor(builder, params);

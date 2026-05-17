@@ -24,11 +24,11 @@ async function notifyNewPosters(ctx: AppContext) {
   const newUsers = ctx.db
     .selectFrom('post')
     .distinctOn('author')
-    .select(['author', 'effectiveTimestamp'])
+    .select(['author', 'timestamp'])
     .where('language', 'in', LANGS_HEBREW)
     .where('replyTo', 'is', null)
     .orderBy('author')
-    .orderBy('effectiveTimestamp', 'asc')
+    .orderBy('timestamp', 'asc')
     .as('first_posts');
 
   const alreadyNotifiedUsers = ctx.db
@@ -38,7 +38,7 @@ async function notifyNewPosters(ctx: AppContext) {
   const newUnnotifiedUsers = await ctx.db
     .selectFrom(newUsers)
     .select('author')
-    .where('effectiveTimestamp', '>', startDate.toISOString())
+    .where('timestamp', '>', startDate.toISOString())
     .except(alreadyNotifiedUsers)
     .execute();
 
