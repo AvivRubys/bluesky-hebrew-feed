@@ -18,6 +18,7 @@ export const migrationProvider: MigrationProvider = {
       '013': optimizeIndexes2,
       '014': addRecommendedIndexes,
       '015': addFilteredUsers,
+      '016': removeCid
     };
   },
 };
@@ -222,5 +223,12 @@ const addFilteredUsers = {
       .createTable('filtered_users')
       .addColumn('did', 'varchar', (col) => col.notNull().primaryKey())
       .execute();
+  },
+};
+
+
+const removeCid = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.alterTable('post').dropColumn('cid').execute()
   },
 };

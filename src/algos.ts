@@ -57,7 +57,6 @@ function createLanguageFeed(
         qb.selectFrom('filtered_users').select('did'),
       )
       .orderBy('effectiveTimestamp', 'desc')
-      .orderBy('cid', 'desc')
       .limit(params.limit);
 
     if (includeReplies) {
