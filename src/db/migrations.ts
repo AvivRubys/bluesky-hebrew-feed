@@ -18,7 +18,8 @@ export const migrationProvider: MigrationProvider = {
       '013': optimizeIndexes2,
       '014': addRecommendedIndexes,
       '015': addFilteredUsers,
-      '016': removeCid
+      '016': removeCid,
+      '017': removeIndexedAt,
     };
   },
 };
@@ -226,9 +227,14 @@ const addFilteredUsers = {
   },
 };
 
-
 const removeCid = {
   async up(db: Kysely<unknown>) {
     await db.schema.alterTable('post').dropColumn('cid').execute()
+  },
+};
+
+const removeIndexedAt = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.alterTable('post').dropColumn('indexedAt').execute()
   },
 };

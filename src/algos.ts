@@ -15,15 +15,17 @@ function addCursor<T>(
   builder: SelectQueryBuilder<any, any, T>,
   params: QueryParams,
 ) {
-  if (!params.cursor) {
+  const {cursor} = params;
+  if (!cursor) {
     return builder;
   }
 
-  const indexedAt = params.cursor;
-  if (!indexedAt) {
+  const cursorNum = parseInt(cursor);
+  if (Number.isNaN(cursorNum)) {
     throw new InvalidRequestError('malformed cursor');
   }
-  const timeStr = new Date(parseInt(indexedAt, 10)).toISOString();
+
+  const timeStr = new Date(cursorNum).toISOString();
   return builder.where('effectiveTimestamp', '<=', timeStr);
 }
 

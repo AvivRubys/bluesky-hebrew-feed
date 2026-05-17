@@ -22,9 +22,8 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
       .filter((op) => hasHebrewLetters(op.record.text))
       .map(async (create) => {
         const language = await extractTextLanguage(removeFacets(create.record));
-        const indexedAt = new Date();
         const createdAt = create.record.createdAt;
-        const effectiveTimestamp = min([indexedAt, createdAt]).toISOString();
+        const effectiveTimestamp = min([new Date(), createdAt]).toISOString();
         logger.info({uri: create.uri, text: create.record.text, effectiveTimestamp}, "Indexing new post")
 
         return {
@@ -32,7 +31,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
           author: create.author,
           replyTo: create.record.reply?.parent.uri,
           replyRoot: create.record.reply?.root.uri,
-          indexedAt: indexedAt.toISOString(),
           createdAt: create.record.createdAt,
           effectiveTimestamp,
           language,
