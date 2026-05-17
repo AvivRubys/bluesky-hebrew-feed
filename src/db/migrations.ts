@@ -257,8 +257,8 @@ const removeReplyRoot = {
 
 const optimizeLanguageFeedIndex = {
   async up(db: Kysely<unknown>) {
-    await db.schema.dropIndex('language_feed_index').execute();
-    await db.schema.dropIndex('post_language_replyto_index').execute();
+    await db.schema.dropIndex('language_feed_index').ifExists().execute();
+    await db.schema.dropIndex('post_language_replyto_index').ifExists().execute();
 
     await db.schema
       .createIndex('language_feed_index')
