@@ -21,6 +21,7 @@ export const migrationProvider: MigrationProvider = {
       '016': removeCid,
       '017': removeIndexedAt,
       '018': removeCreatedAtRenameTimestamp,
+      '019': removeReplyRoot,
     };
   },
 };
@@ -244,5 +245,11 @@ const removeCreatedAtRenameTimestamp = {
   async up(db: Kysely<unknown>) {
     await db.schema.alterTable('post').dropColumn('createdAt').execute()
     await db.schema.alterTable('post').renameColumn('effectiveTimestamp', 'timestamp').execute()
+  },
+};
+
+const removeReplyRoot = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.alterTable('post').dropColumn('replyRoot').execute()
   },
 };

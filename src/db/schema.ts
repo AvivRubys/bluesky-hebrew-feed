@@ -11,7 +11,6 @@ export type PostSchema = {
   uri: string;
   author: string;
   timestamp: string;
-  replyRoot?: string;
   replyTo?: string;
   language: string;
 };

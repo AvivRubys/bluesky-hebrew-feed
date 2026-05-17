@@ -29,7 +29,6 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
           uri: create.uri,
           author: create.author,
           replyTo: create.record.reply?.parent.uri,
-          replyRoot: create.record.reply?.root.uri,
           timestamp,
           language,
         };
