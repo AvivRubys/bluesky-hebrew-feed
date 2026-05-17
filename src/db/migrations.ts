@@ -23,6 +23,7 @@ export const migrationProvider: MigrationProvider = {
       '018': removeCreatedAtRenameTimestamp,
       '019': removeReplyRoot,
       '020': optimizeLanguageFeedIndex,
+      '021': addCoveringUriToFeedIndex,
     };
   },
 };
@@ -266,5 +267,17 @@ const optimizeLanguageFeedIndex = {
       .columns(['language', 'replyTo', 'timestamp desc'])
       .using('btree')
       .execute();
+  },
+};
+
+const addCoveringUriToFeedIndex = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.dropIndex('language_feed_index').ifExists().execute();
+
+    await sql`
+      CREATE INDEX language_feed_index
+      ON post (language, replyTo, timestamp DESC)
+      INCLUDE (uri)
+    `.execute(db);
   },
 };
