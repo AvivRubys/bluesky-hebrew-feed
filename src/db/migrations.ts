@@ -22,6 +22,7 @@ export const migrationProvider: MigrationProvider = {
       '017': removeIndexedAt,
       '018': removeCreatedAtRenameTimestamp,
       '019': removeReplyRoot,
+      '020': optimizeLanguageFeedIndex,
     };
   },
 };
@@ -251,5 +252,19 @@ const removeCreatedAtRenameTimestamp = {
 const removeReplyRoot = {
   async up(db: Kysely<unknown>) {
     await db.schema.alterTable('post').dropColumn('replyRoot').execute()
+  },
+};
+
+const optimizeLanguageFeedIndex = {
+  async up(db: Kysely<unknown>) {
+    await db.schema.dropIndex('language_feed_index').execute();
+    await db.schema.dropIndex('post_language_replyto_index').execute();
+
+    await db.schema
+      .createIndex('language_feed_index')
+      .on('post')
+      .columns(['language', 'replyTo', 'timestamp desc'])
+      .using('btree')
+      .execute();
   },
 };
