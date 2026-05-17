@@ -6,6 +6,7 @@ import { DatabaseSchema } from './schema';
 import { migrationProvider } from './migrations';
 import { Config } from '../config';
 import { createMonitoringPlugin } from '../util/monitoring';
+import logger from '../logger';
 
 const database_operation_duration = new Histogram({
   name: 'database_operation_duration',
@@ -31,8 +32,10 @@ export function createDb(cfg: Config): Database {
 
 export async function migrateToLatest(db: Database) {
   const migrator = new Migrator({ db, provider: migrationProvider });
+  logger.info("Running migrations...")
   const { error } = await migrator.migrateToLatest();
   if (error) throw error;
+  logger.info("Running migrations complete")
 }
 
 export type Database = Kysely<DatabaseSchema>;
