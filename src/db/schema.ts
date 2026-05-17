@@ -1,4 +1,4 @@
-import { Generated, GeneratedAlways } from 'kysely';
+import { GeneratedAlways } from 'kysely';
 
 export type DatabaseSchema = {
   post: PostSchema;
