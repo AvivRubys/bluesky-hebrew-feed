@@ -69,6 +69,7 @@ async function fetchSelfFilteredUsers(bsky: AtpAgent): Promise<string[]> {
   do {
     const response = await bsky.getLikes({
       uri: FILTERED_USERS_BY_REQUEST_POST,
+      cursor,
     });
     users.push(...response.data.likes.map((like) => like.actor.did));
     cursor = response.data.cursor;
