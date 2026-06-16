@@ -1,4 +1,3 @@
-import { Counter } from 'prom-client';
 import { BlockMap, cborToLexRecord, readCar } from '@atproto/repo';
 import { BlobRef } from '@atproto/lexicon';
 import { ids, lexicons } from '../lexicon/lexicons';
@@ -20,11 +19,6 @@ class LazyCar {
   }
 }
 
-const firehose_operations = new Counter({
-  name: 'firehose_operations',
-  help: 'All operations seen on the firehose',
-  labelNames: ['action', 'collection'],
-});
 export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
   const car = new LazyCar(evt.blocks);
   const opsByType: OperationsByType = {
@@ -34,7 +28,6 @@ export async function getOpsByType(evt: Commit): Promise<OperationsByType> {
   for (const op of evt.ops) {
     const uri = `at://${evt.repo}/${op.path}`;
     const [collection] = op.path.split('/');
-    firehose_operations.inc({ action: op.action, collection });
 
     if (
       !op.cid ||
