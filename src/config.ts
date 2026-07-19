@@ -9,9 +9,10 @@ const stringBooleanSchema = z.preprocess((val) => {
 }, z.boolean());
 
 const envSchema = z.object({
-  // HTTP Server
+  // Server
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('localhost'),
+  FILTERED_USERS_UPDATER: stringBooleanSchema.default(false),
 
   // DB
   POSTGRES_CONNECTION_STRING: z.string(),

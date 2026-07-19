@@ -36,13 +36,19 @@ export async function runFeedGenerator(cfg: Config): Promise<void> {
   void firehose.run(cfg.SUBSCRIPTION_RECONNECT_DELAY);
   const server = app.listen(cfg.PORT, cfg.HOST);
 
-  if (ctx.cfg.BOT_ENABLED) {
+  if (ctx.cfg.BOT_ENABLED || ctx.cfg.FILTERED_USERS_UPDATER) {
     await ctx.bsky.login({
       identifier: cfg.BLUESKY_CLIENT_LOGIN_IDENTIFIER,
       password: cfg.BLUESKY_CLIENT_LOGIN_PASSWORD,
     });
-    void runNotifyBot(ctx);
-    void filteredUsersUpdater(bsky, db);
+
+    if (ctx.cfg.BOT_ENABLED) {
+      void runNotifyBot(ctx);
+    }
+
+    if (ctx.cfg.FILTERED_USERS_UPDATER) {
+      void filteredUsersUpdater(bsky, db);
+    }
   }
 
   await events.once(server, 'listening');
