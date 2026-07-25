@@ -14,7 +14,19 @@ import { collectDefaultMetrics } from 'prom-client';
 export function createApi(ctx: AppContext) {
   const app = express();
   app.use(morgan('bsky-feed-generator'));
-  app.use(promBundle({ includePath: true }));
+  app.use(
+    promBundle({
+      includePath: true,
+      normalizePath: (req) => {
+        // req.route is ONLY present if Express successfully matched a registered route
+        if (req.route) {
+          return req.route.path;
+        }
+
+        return 'other';
+      },
+    }),
+  );
   collectDefaultMetrics();
 
   const server = createServer({
